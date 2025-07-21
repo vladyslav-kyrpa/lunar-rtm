@@ -1,2 +1,2 @@
-# lunar-rtm
+# Lunar Real Time Messenger
 Real time messenger
