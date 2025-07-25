@@ -3,6 +3,7 @@ import TextBox from "../shared/TextBox";
 import ActiveButton from "../shared/ActiveButton";
 import MinorButton from "../shared/MinorButton";
 import { useNavigate } from "react-router-dom";
+import GoogleIcon from "../../icons/google.svg";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -41,7 +42,12 @@ export default function RegisterPage() {
             <ActiveButton onClick={handleSubmit} style="mb-5">Log-in</ActiveButton>
 
             <p className="text-center mb-3">--- or authenticate with ---</p>
-            <ActiveButton onClick={handleSubmit} style="mb-3">Google</ActiveButton>
+            <ActiveButton onClick={handleSubmit} style="mb-3"> 
+                <div className="flex items-center justify-center space-x-3">
+                    <img src={GoogleIcon} alt="google-icon" width={24} height={24} />
+                    <p>Google Account</p>
+                </div>
+            </ActiveButton>
 
 
             <MinorButton onClick={handleToRegister}>I don't have an account</MinorButton>
