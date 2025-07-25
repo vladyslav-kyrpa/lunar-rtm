@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+#root {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+
+    --page-background-color: #182126;
+    --active-color: #75e0a3;
+    --error-color: rgb(255, 88, 88);
+    --surface-color: #283740;
+    --subsurface-color: #1f2a31;
+}
+
+body {
+    background-color: #182126;
+}
+
+::selection {
+    color: black;
+    background: var(--active-color)
+}
+
+.bg-active {
+    background-color: var(--active-color);
+}
+
+.bg-surface {
+    background-color: var(--surface-color);
+}
+
+.border-color-active {
+    border-color: var(--active-color);
+}
+
+.text-box-colors {
+    transition: 0.1s;
+    background-color: var(--subsurface-color);
+    outline-style: solid;
+    outline-color: transparent;
+}
+
+.text-box-error-colors {
+    outline-color: var(--error-color) !important;
+}
+
+.text-box-colors:focus {
+    transition: 0.1s;
+    outline-color: var(--active-color);
+}

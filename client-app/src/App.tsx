@@ -1,20 +1,30 @@
-import { Route, Routes } from 'react-router-dom'
-import LgHomePage from './pages/LgHomePage'
-import LoginPage from './pages/LoginPage'
-import NotFoundPage from './pages/NotFoundPage'
-import useWindowWigth from './hooks/useWindowWigth'
-import ChatPage from './pages/ChatPage'
+import { Route, Routes } from "react-router-dom"
+import NotFoundPage from "./components/pages/NotFoundPage"
+import LoginPage from "./components/pages/LoginPage"
+import RegisterPage from "./components/pages/RegisterPage"
+import ChatsListPage from "./components/pages/ChatsListPage"
+import MainLayout from "./components/shared/MainLayout"
 
 function App() {
-  const width = useWindowWigth();
-  
+
+  // TODO: Proper routing
+  // if not Authenticated -> to lending page
+  // if authenticated -> to home page (with list of chats)
+
   return <Routes>
-    {width <= 700 
-      ? <Route path="/" element={<ChatPage/>}/> 
-      : <Route path="/" element={<LgHomePage/>}/>
-    }
-    <Route path="/login" element={<LoginPage/>}/>
-    <Route path="*" element={<NotFoundPage/>}/>
+    <Route path="/log-in" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
+    <Route path="/" element={
+      <MainLayout>
+        <ChatsListPage />
+      </MainLayout>
+    } />
+    <Route path="/chats" element={
+      <MainLayout>
+        <ChatsListPage />
+      </MainLayout>
+    } />
+    <Route path="*" element={<NotFoundPage />} />
   </Routes>
 }
 
