@@ -9,7 +9,7 @@ interface ActiveButtonProps {
 export default function ActiveButton({ children, onClick, style }: ActiveButtonProps) {
     return <button
         onClick={onClick}
-        className={"bg-active text-black rounded p-3 " + (style ?? '')}>
+        className={"bg-white text-black rounded p-3 " + (style ?? '')}>
         {children}
     </button>
 }

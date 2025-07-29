@@ -13,7 +13,7 @@ export default function AvatarImage({iconUrl, size}:AvatarImageProp) {
         sizeStyle = "h-[72px] w-[72px]"
 
     return <img src={iconUrl} 
-        className={sizeStyle + " rounded-full bg-black"}/> 
+        className={sizeStyle + " rounded-full bg-black border-2 cus-outline"}/> 
 }
 
 

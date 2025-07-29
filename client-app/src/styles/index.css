@@ -1,50 +1,63 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@tailwind utilities;
 
-#root {
-    font-size: 16px;
-    font-weight: 500;
-    color: white;
+@theme {
+  --font-display: "Satoshi", "sans-serif";
+  --color-active: #ffffff;
+  --color-surface: #0e0e0e;
+  --color-on-surface:#212121;
+  --color-outline: #212121;
+}
 
-    --page-background-color: #182126;
-    --active-color: #75e0a3;
-    --error-color: rgb(255, 88, 88);
-    --surface-color: #283740;
-    --subsurface-color: #1f2a31;
+:root {
+  --page-background-color: #000000;
 }
 
 body {
-    background-color: #182126;
+  background-color: var(--page-background-color);
+  color: white;
 }
 
 ::selection {
     color: black;
-    background: var(--active-color)
-}
-
-.bg-active {
-    background-color: var(--active-color);
-}
-
-.bg-surface {
-    background-color: var(--surface-color);
-}
-
-.border-color-active {
-    border-color: var(--active-color);
+    background: white;
 }
 
 .text-box-colors {
     transition: 0.1s;
-    background-color: var(--subsurface-color);
+    background-color: black;
     outline-style: solid;
-    outline-color: transparent;
+    outline-color: var(--color-outline);
 }
 
 .text-box-error-colors {
-    outline-color: var(--error-color) !important;
+    outline-color: red !important;
 }
 
 .text-box-colors:focus {
     transition: 0.1s;
-    outline-color: var(--active-color);
+    outline-color: white;
+}
+
+.menu {
+    transition: 1s;
+    transform: translateX(0);
+}
+
+.menu-hidden {
+    transition: 1s;
+    transform: translateX(-400);
+}
+
+.menu-button {
+    display: inline;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.menu-button:hover {
+  transition: 0.2s;
+  background-color: rgb(38, 38, 38);
 }

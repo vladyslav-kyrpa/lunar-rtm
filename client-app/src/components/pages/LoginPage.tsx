@@ -1,9 +1,9 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import TextBox from "../shared/TextBox";
 import ActiveButton from "../shared/ActiveButton";
-import MinorButton from "../shared/MinorButton";
-import { useNavigate } from "react-router-dom";
-import GoogleIcon from "../../icons/google.svg";
+import TextButton from "../shared/TextButton";
+import GoogleIcon from "../../assets/icons/google.svg";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -19,14 +19,12 @@ export default function RegisterPage() {
         }
     }
 
-
     const handleToRegister = () => {
-        navigate('/register')
+        navigate('/register');
     }
 
-
     return <div className="h-screen flex flex-col justify-center items-center">
-        <div className="flex flex-col p-10 bg-surface rounded-2xl w-[500px]">
+        <div className="flex flex-col w-[400px]">
             <p className="text-center font-bold mb-5">Log-in</p>
 
             <label className="mb-3">Login</label>
@@ -48,9 +46,7 @@ export default function RegisterPage() {
                     <p>Google Account</p>
                 </div>
             </ActiveButton>
-
-
-            <MinorButton onClick={handleToRegister}>I don't have an account</MinorButton>
+            <TextButton onClick={handleToRegister}>I don't have an account</TextButton>
         </div>
     </div>
 }
