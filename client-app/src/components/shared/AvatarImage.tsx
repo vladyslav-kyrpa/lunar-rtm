@@ -1,9 +1,9 @@
 interface AvatarImageProp {
-    iconUrl:string
+    imgUrl:string
     size: "large" | "medium" | "small"
 }
 
-export default function AvatarImage({iconUrl, size}:AvatarImageProp) {
+export default function AvatarImage({imgUrl: iconUrl, size}:AvatarImageProp) {
     let sizeStyle = "h-8 w-8"
     if(size === "small")
         sizeStyle = "h-8 w-8"

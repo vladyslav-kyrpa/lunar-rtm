@@ -43,7 +43,7 @@ interface UserProfileHeaderProps {
 function UserProfileHeader({onClick}:UserProfileHeaderProps) {
     const username = "username";
     return <div className="flex flex-row items-center p-2" onClick={()=>onClick(username)}>
-        <AvatarImage iconUrl="localhost" size="large"/>
+        <AvatarImage imgUrl="localhost" size="large"/>
         <div className="ms-4">
             <p className="mb-1 font-bold">Public Display Name</p>
             <p>@username</p>

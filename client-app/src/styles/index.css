@@ -4,6 +4,7 @@
 @theme {
   --font-display: "Satoshi", "sans-serif";
   --color-active: #ffffff;
+  --color-minor: #505050;
   --color-surface: #0e0e0e;
   --color-on-surface:#212121;
   --color-outline: #212121;
