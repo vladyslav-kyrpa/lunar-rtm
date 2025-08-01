@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AvatarImage from "../shared/AvatarImage";
 import Placeholder from "../../assets/img-placeholder.jpg"
+import { Block } from "../shared/Blocks";
 
 export default function ChatsListPage() {
     const [items, setItems] = useState<ChatHeader[]>([]);
@@ -55,14 +56,15 @@ interface ChatListItemProps {
     onSelected: (id: string) => void
 }
 function ChatListItem({ title, newMessages, iconUrl, id, onSelected }: ChatListItemProps) {
-    return <div className="flex items-center space-x-3 mt-3 mx-3 p-3 
-            transition duration-200 ease-in-out hover:bg-on-surface rounded"
-        onClick={() => onSelected(id)}>
-        <AvatarImage size="medium" imgUrl={iconUrl} />
-        <p>{title}</p>
-        {newMessages > 0 &&
-            <p className="bg-white p-1 rounded text-black">{newMessages}</p>
-        }
+    return <div onClick={() => onSelected(id)}>
+        <Block className="mx-3 mt-3 flex items-center space-x-3 transition 
+            ease-in-out duration-150 hover:bg-on-surface">
+            <AvatarImage size="medium" imgUrl={iconUrl} />
+            <p>{title}</p>
+            {newMessages > 0 &&
+                <p className="bg-white p-1 rounded text-black">{newMessages}</p>
+            }
+        </Block>
     </div>
 }
 

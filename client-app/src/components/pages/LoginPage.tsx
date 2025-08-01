@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
-import TextBox from "../shared/TextBox";
-import ActiveButton from "../shared/ActiveButton";
-import TextButton from "../shared/TextButton";
 import GoogleIcon from "../../assets/icons/google.svg";
+import { ActiveButton, TextButton } from "../shared/Buttons";
+import { FormTextBox } from "../shared/TextBoxes";
+import { Block } from "../shared/Blocks";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -24,30 +24,29 @@ export default function RegisterPage() {
     }
 
     return <div className="h-screen flex flex-col justify-center items-center">
-        <div className="flex flex-col w-[400px]">
+        <Block className="flex flex-col w-[400px]">
             <p className="text-center font-bold mb-5">Log-in</p>
 
             <label className="mb-3">Login</label>
-            <TextBox value={login} onChange={setLogin}
-                placeholder="Enter your username or email" style="mb-5"
+            <FormTextBox value={login} onChange={setLogin}
+                placeholder="Enter your username or email" className="mb-5"
                 isError={isError && !isUsernameValid(login)} />
 
             <label className="mb-3">Password</label>
-            <TextBox value={password} onChange={setPassword}
-                placeholder="Enter password" style="mb-10"
+            <FormTextBox value={password} onChange={setPassword}
+                placeholder="Enter password" className="mb-10"
                 isError={isError && !isPasswordValid(password)} />
 
-            <ActiveButton onClick={handleSubmit} style="mb-5">Log-in</ActiveButton>
-
+            <ActiveButton onClick={handleSubmit} className="mb-3">Log-in</ActiveButton>
             <p className="text-center mb-3">--- or authenticate with ---</p>
-            <ActiveButton onClick={handleSubmit} style="mb-3"> 
+            <ActiveButton onClick={handleSubmit} className="mb-3"> 
                 <div className="flex items-center justify-center space-x-3">
                     <img src={GoogleIcon} alt="google-icon" width={24} height={24} />
                     <p>Google Account</p>
                 </div>
             </ActiveButton>
-            <TextButton onClick={handleToRegister}>I don't have an account</TextButton>
-        </div>
+            <TextButton onClick={handleToRegister} text="I don't have an account"/>
+        </Block>
     </div>
 }
 

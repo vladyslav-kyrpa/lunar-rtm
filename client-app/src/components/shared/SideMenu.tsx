@@ -20,7 +20,7 @@ export default function SideMenu() {
     const menuItems:MenuItem[] = [
         { title:"New chat", iconSrc:NewChatIcon, handler:()=>{} },
         { title:"All chats", iconSrc:ChatListIcon, handler:()=>{ navigate("/chats")} },
-        { title:"Settings", iconSrc:SettingsIcon, handler:()=>{} },
+        { title:"Settings", iconSrc:SettingsIcon, handler:()=>{ navigate("/settings")} },
         { title:"Logout", iconSrc:LogoutIcon, handler:()=>{} },
     ] 
 

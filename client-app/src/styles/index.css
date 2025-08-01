@@ -3,41 +3,36 @@
 
 @theme {
   --font-display: "Satoshi", "sans-serif";
-  --color-active: #ffffff;
-  --color-minor: #505050;
-  --color-surface: #0e0e0e;
-  --color-on-surface:#212121;
-  --color-outline: #212121;
+  --color-background: #0C0C0C;
+
+  --color-main-text: #ffffff;
+  --color-minor-text: #838383;
+  --color-inverted-text: #000000;
+
+  --color-active: #E3E3E3;
+  --color-active-outline: #ffffff;
+
+  --color-surface: #121212;
+  --color-surface-outline: #1A1A1A;
+
+  --color-on-surface:#1C1C1C;
+  --color-on-surface-outline: #222222;
+
+  --color-transparent: #00000000;
 }
 
 :root {
-  --page-background-color: #000000;
+  font-size: 16px;
+  color:var(--color-main-text);
 }
 
 body {
-  background-color: var(--page-background-color);
-  color: white;
+  background-color: var(--color-background);
 }
 
 ::selection {
-    color: black;
-    background: white;
-}
-
-.text-box-colors {
-    transition: 0.1s;
-    background-color: black;
-    outline-style: solid;
-    outline-color: var(--color-outline);
-}
-
-.text-box-error-colors {
-    outline-color: red !important;
-}
-
-.text-box-colors:focus {
-    transition: 0.1s;
-    outline-color: white;
+  background-color: var(--color-active);
+  color: var(--color-inverted-text);
 }
 
 .menu {

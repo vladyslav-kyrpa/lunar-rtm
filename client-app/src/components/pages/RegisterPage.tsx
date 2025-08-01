@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
-import TextBox from "../shared/TextBox";
-import ActiveButton from "../shared/ActiveButton";
-import TextButton from "../shared/TextButton";
+import { FormTextBox } from "../shared/TextBoxes";
+import { ActiveButton, TextButton } from "../shared/Buttons";
+import { Block } from "../shared/Blocks";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -35,37 +35,37 @@ export default function RegisterPage() {
 
 
     return <div className="h-screen flex justify-center items-center">
-        <div className="flex flex-col w-[400px]">
+        <Block className="flex flex-col w-[400px]">
             <p className="text-center font-bold mb-5">Register</p>
 
             <label className="mb-3">Username</label>
-            <TextBox value={username} onChange={setUsername}
-                placeholder="Enter username" style="mb-5"
+            <FormTextBox value={username} onChange={setUsername}
+                placeholder="Enter username" className="mb-5"
                 isError={isError && !isUsernameValid(username)} />
 
             <label className="mb-3">Display Name</label>
-            <TextBox value={displayName} onChange={setDisplayName}
-                placeholder="Enter Display Name" style="mb-5"
+            <FormTextBox value={displayName} onChange={setDisplayName}
+                placeholder="Enter Display Name" className="mb-5"
                 isError={isError && !isDisplayNameValid(displayName)} />
 
             <label className="mb-3">Email</label>
-            <TextBox value={email} onChange={setEmail}
-                placeholder="Example: box@mail.com" style="mb-5"
+            <FormTextBox value={email} onChange={setEmail}
+                placeholder="Example: box@mail.com" className="mb-5"
                 isError={isError && !isEmailValid(email)} />
 
             <label className="mb-3">Password</label>
-            <TextBox value={password} onChange={setPassword}
-                placeholder="Enter password" style="mb-5"
+            <FormTextBox value={password} onChange={setPassword}
+                placeholder="Enter password" className="mb-5"
                 isError={isError && !isPasswordValid(password)} />
 
             <label className="mb-3">Confirmed password</label>
-            <TextBox value={confirmedPassword} onChange={setConfirmedPassword}
-                placeholder="Enter password again" style="mb-10"
+            <FormTextBox value={confirmedPassword} onChange={setConfirmedPassword}
+                placeholder="Enter password again" className="mb-10"
                 isError={isError && password !== confirmedPassword || confirmedPassword === ''} />
 
-            <ActiveButton onClick={handleSubmit} style="mb-3">Register</ActiveButton>
-            <TextButton onClick={handleToLogIn}>I have an account</TextButton>
-        </div>
+            <ActiveButton onClick={handleSubmit} className="mb-3">Register</ActiveButton>
+            <TextButton onClick={handleToLogIn} text="I have an account"></TextButton>
+        </Block>
     </div>
 }
 
