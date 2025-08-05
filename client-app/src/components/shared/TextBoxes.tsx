@@ -8,7 +8,7 @@ interface TextBoxProps {
 }
 
 export function FormTextBox({ onChange, placeholder, value, isSecret, className, isError }: TextBoxProps) {
-    const basicStyles = "p-2 bg-background outline-2 focus:outline-active outline-on-surface-outline rounded text-active " + className;
+    const basicStyles = "p-3 bg-background outline-2 focus:outline-active outline-on-surface-outline rounded text-active " + className;
     return <input
         className={ (isError ? "outline-red-500 " : "outline-on-surface-outline ") + basicStyles }
         type={isSecret ? "password" : "text"}

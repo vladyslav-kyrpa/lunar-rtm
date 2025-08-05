@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AvatarImage from "../shared/AvatarImage";
-import Placeholder from "../../assets/img-placeholder.jpg"
 import { Block } from "../shared/Blocks";
+import api from "../../api/ChatsApi";
+import type ChatHeader from "../../data-model/ChatHeader";
 
 export default function ChatsListPage() {
     const [items, setItems] = useState<ChatHeader[]>([]);
@@ -13,7 +14,7 @@ export default function ChatsListPage() {
     }
 
     useEffect(() => {
-        fetchChats().then((result) => {
+        api.fetchChats().then((result) => {
             console.log(result);
             setItems(result);
         }).catch((error) => {
@@ -27,11 +28,6 @@ export default function ChatsListPage() {
         </div>
         <ChatsList onSelected={handleChatSelected} items={items} />
     </>
-}
-
-async function fetchChats(): Promise<ChatHeader[]> {
-    const items = getList();
-    return items;
 }
 
 interface ChatsListProps {
@@ -66,65 +62,4 @@ function ChatListItem({ title, newMessages, iconUrl, id, onSelected }: ChatListI
             }
         </Block>
     </div>
-}
-
-interface ChatHeader {
-    id: string,
-    title: string,
-    newMessages: number,
-    imageUrl: string
-}
-
-function getList() {
-    const chats: ChatHeader[] = [
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-    ];
-    return chats;
 }

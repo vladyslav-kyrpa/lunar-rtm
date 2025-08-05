@@ -13,12 +13,12 @@ interface MenuItem {
 
 export default function SideMenu() {
     const navigate = useNavigate();
-    const handleOnUserProfile = (username:string) => {
-        navigate("/profile/"+username);
+    const handleOnUserProfile = () => {
+        navigate("/profile/me");
     }
 
     const menuItems:MenuItem[] = [
-        { title:"New chat", iconSrc:NewChatIcon, handler:()=>{} },
+        { title:"New chat", iconSrc:NewChatIcon, handler:()=>{ navigate("/create-chat")} },
         { title:"All chats", iconSrc:ChatListIcon, handler:()=>{ navigate("/chats")} },
         { title:"Settings", iconSrc:SettingsIcon, handler:()=>{ navigate("/settings")} },
         { title:"Logout", iconSrc:LogoutIcon, handler:()=>{} },
@@ -38,11 +38,10 @@ export default function SideMenu() {
 }
 
 interface UserProfileHeaderProps {
-    onClick:(username:string)=>void
+    onClick:()=>void
 }
 function UserProfileHeader({onClick}:UserProfileHeaderProps) {
-    const username = "username";
-    return <div className="flex flex-row items-center p-2" onClick={()=>onClick(username)}>
+    return <div className="flex flex-row items-center p-2" onClick={onClick}>
         <AvatarImage imgUrl="localhost" size="large"/>
         <div className="ms-4">
             <p className="mb-1 font-bold">Public Display Name</p>
