@@ -36,7 +36,12 @@ export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPagePr
             return;
         }
 
-        api.updateChat(chat.id, newTitle, newDescription, newImage).then((result) => {
+        api.updateChat(chat.id, newTitle, newDescription).then((result) => {
+            console.log(result);
+            if(!newImage)
+                return;
+            return api.updateImage(chat.id, newImage);
+        }).then((result)=>{
             console.log(result);
             const data: EditChatFormData = {
                 title: newTitle,

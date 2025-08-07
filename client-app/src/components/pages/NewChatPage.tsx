@@ -2,17 +2,18 @@ import { useState } from "react";
 import { Block } from "../shared/Blocks";
 import { FormTextBox } from "../shared/TextBoxes";
 import { ActiveButton } from "../shared/Buttons";
-import ImageUpload from "../shared/ImageUpload";
 import api from "../../api/ChatsApi";
+import { useNavigate } from "react-router-dom";
 
 export default function NewChatPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [image, setImage] = useState<File|undefined>();
+    const navigate = useNavigate();
         
     const handleCreate = () => {
-        api.createChat(title, description, image).then((r)=>{
+        api.createChat(title, description).then((r)=>{
             console.log(r);
+            navigate("/chats");
         }).catch((e)=>{
             console.error(e);
         });
@@ -36,7 +37,6 @@ export default function NewChatPage() {
                 isError={description === ""}
                 onChange={setDescription}/>
             <label className="mb-2">Image</label>
-            <ImageUpload className="mb-5" onChange={setImage}/>
             <ActiveButton  onClick={handleCreate}>Create</ActiveButton>
         </Block>
     </div>

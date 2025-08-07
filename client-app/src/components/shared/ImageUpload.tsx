@@ -12,7 +12,12 @@ export default function ImageUpload({onChange, className}:ImageUploadProps) {
     const [imgUrl, setImageUrl] = useState<string | null>(null);
 
     const handleFileSelection = (files: FileList|null) => {
-        if(files){
+        if(files && files.length > 0){
+            const sizeLimit = 2 * 1024 * 1024; // 2 MB
+            if(files[0].size > sizeLimit){
+                alert("Image needs to be under 2MB!");
+                return;
+            }
             setFile(files[0]);
             onChange(files[0]);
         }

@@ -4,6 +4,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TODO: Just for development purposes
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AnyOrigin", corsBuilder => {
+        corsBuilder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -13,5 +24,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AnyOrigin");
 app.MapControllers();
 app.Run();

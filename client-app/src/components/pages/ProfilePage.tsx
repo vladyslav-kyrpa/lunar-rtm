@@ -62,7 +62,7 @@ export default function ProfilePage() {
     }
     return <div className="flex flex-col mx-auto w-[500px] p-2">
         <Block className="mt-15 flex flex-col items-center">
-            <AvatarImage size="extra-large" imgUrl={profile.avatarUrl} />
+            <AvatarImage size="extra-large" imgUrl={profile.imageUrl} />
             <div className="flex mb-1 mt-3">
                 <p className="text-2xl">{profile.displayName}</p>
                 {isCurrentUser && <div className="ms-auto">
@@ -97,13 +97,16 @@ function EditProfilePage({ user, onSave, onClose }: EditProfilePageProps) {
     }
 
     const handleOnSave = () => {
-        if (newUsername === "" || newDisplayName === "" || newBio) {
+        if (newUsername === "" || newDisplayName === "" || newBio === "") {
             console.error("Form values should be not empty");
             return;
         }
 
-        api.updateProfile(user.username, newUsername, newDisplayName, newBio, image).then((r) => {
-            console.log(r);
+        api.updateProfile(user.username, newUsername, newDisplayName, newBio).then((_) => {
+            if(!image) 
+                return;
+            return api.updateImage(newUsername, image);
+        }).then((_)=>{
             onSave(newUsername);
         }).catch((e) => {
             console.error(e);

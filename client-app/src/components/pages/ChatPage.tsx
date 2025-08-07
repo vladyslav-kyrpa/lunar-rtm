@@ -124,7 +124,7 @@ function MessageItem({ item, key, isIncoming }: MessageItemProps) {
                 {isIncoming ? " @" + item.sender + ":" : " You:"}
             </div>
             {item.content}
-            <div className="text-minor-text text-end mt-1">at {item.date}</div>
+            <div className="text-minor-text text-end mt-1">at {item.timestamp}</div>
         </div>
     </div>
 }

@@ -1,5 +1,7 @@
 export default interface ChatMessage {
+    id:string,
+    chatId: string,
     sender:string,
-    date:string,
+    timestamp:string,
     content:string,
 }

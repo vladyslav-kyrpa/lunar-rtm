@@ -39,7 +39,7 @@ function ChatsList({ items, onSelected }: ChatsListProps) {
         title={item.title}
         id={item.id}
         iconUrl={item.imageUrl}
-        newMessages={item.newMessages}
+        newMessages={item.newMessagesCount}
         onSelected={onSelected} />
     )
 }

@@ -1,103 +1,88 @@
 import type Chat from "../data-model/Chat";
 import type ChatHeader from "../data-model/ChatHeader";
-import Placeholder from "../assets/img-placeholder.jpg"
 import type ChatMessage from "../data-model/ChatMessage";
 
+const url = "http://localhost:5219"
+
 async function fetchChats(): Promise<ChatHeader[]> {
-        const chats: ChatHeader[] = [
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-        {
-            title: "some long text here",
-            id: "1",
-            newMessages: 12,
-            imageUrl: Placeholder
-        },
-        {
-            title: "1",
-            id: "2",
-            newMessages: 0,
-            imageUrl: Placeholder
-        },
-    ];
-    return chats;
+    const result = await fetch(url + "/chats");
+    if(result.status === 200){
+        // todo: check structure
+        return (await result.json()) as ChatHeader[]; 
+    } else {
+        throw Error("Failed to fetch chats " + result.statusText);
+    }
 }
 
 async function fetchChat(id: string): Promise<Chat> {
     console.log(id);
-    const items: Chat = {
-        id:id,
-        title: "Chat titile",
-        imageUrl: "",
-        description: "some text here",
-        members: [
-            { username: "1", displayName: "user1", imageUrl: "" },
-            { username: "2", displayName: "user2", imageUrl: "" },
-            { username: "1", displayName: "user1", imageUrl: "" },
-        ]
-    };
-    return items;
+    const result = await fetch(url + "/chats/" + id);
+    if(result.status === 200){
+        return (await result.json()) as Chat;
+    } else {
+        throw Error("Failed to fetch chat: " + result.statusText)
+    }
 }
 
 async function fetchMessages(id:string): Promise<ChatMessage[]>{
-    const messages: ChatMessage[] = [
-        { sender: "1", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "2", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "2", date: "2025-08-21 12:20", content: "text messageghjkgkhjg hj gjkg hjk g" },
-        { sender: "1", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "2", date: "2025-08-21 12:20", content: "text message gkh gk j ghjk jhg j" },
-        { sender: "1", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "2", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "1", date: "2025-08-21 12:20", content: "text message" },
-        { sender: "2", date: "2025-08-21 12:20", content: "text message" },
-    ];
-    return messages;
+    const result = await fetch(url + "/chats/" + id + "/messages");
+    if(result.ok){
+        return (await result.json()) as ChatMessage[];
+    } else {
+        throw Error("Failed to get messages: " + result.statusText);
+    }
 }
 
-async function createChat(title: string, description: string, image?: File) {
-    console.log("create chat");
+async function createChat(title: string, description: string) {
+    const result = await fetch(url + "/chats/create", {
+        method:"POST",
+        headers: {
+            "Content-Type":"application/json",
+        },
+        body: JSON.stringify({title, description})
+    });
+    if(!result.ok){
+        throw Error("Failed to create chat: " + result.statusText);
+    }
 }
 
-async function updateChat(id:string, title?: string, description?: string, image?: File|null) {
-    console.log("Update conversation");
+async function updateChat(id:string, title?: string, description?: string) {
+    const result = await fetch(url + "/chats/" + id + "/update", {
+        method:"POST",
+        headers: {
+            "Content-Type":"application/json",
+        },
+        body: JSON.stringify({title, description})
+    });
+    if(!result.ok){
+        throw Error("Failed to update chat: " + result.statusText);
+    }
 }
 
 async function inviteUser(id: string, username: string) {
-    console.log("invite user");
+    const result = await fetch(url + "/chats/" + id + "/add-member", {
+        method:"POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({username})
+    });
+    if(!result.ok){
+        throw Error("Failed to add chat member: " + result.statusText);
+    }
 }
 
-export default { fetchChats, fetchChat, fetchMessages, createChat, updateChat, inviteUser }
+async function updateImage(id:string, image:File) {
+    const formData = new FormData();
+    formData.append("image", image);
+    const result = await fetch(url + "/chats/" + id + "/update-image", {
+        method:"POST",
+        body: formData 
+    });
+    if(!result.ok){
+        throw Error("Failed to update chat image: " + result.statusText);
+    }
+
+}
+
+export default { fetchChats, fetchChat, fetchMessages, createChat, updateChat, updateImage, inviteUser }

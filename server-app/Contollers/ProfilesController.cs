@@ -11,35 +11,66 @@ public class ProfilesController : ControllerBase
     [HttpGet("{username}")]
     public IActionResult GetProfile(string username)
     {
+        Console.WriteLine($"Get profile: @{username}");
+
         if (username == string.Empty || username == "me")
-            return Ok("Current profile");
-        return Ok($"User {username} profile");
+        {
+            return Ok(new UserProfile
+            {
+                Username = "current-user-profile",
+                DisplayName = "Current user",
+                Bio = "Just current user",
+                ImageUrl = "http://localhost:5219/profiles/current-user/image"
+            });
+        }
+        return Ok(new UserProfile
+        {
+            Username = username,
+            DisplayName = username.ToUpper(),
+            Bio = "Just user",
+            ImageUrl = "http://localhost:5219/profiles/none/image"
+        });
     }
 
     [HttpPost("create")]
-    public IActionResult Create([FromBody] ProfileInfo profile)
+    public IActionResult Create([FromBody] NewProfileInfo profile)
     {
+        Console.WriteLine($"Create profile username:{profile.Username}, displayname:{profile.DisplayName}, password:{profile.Password}, email:{profile.Email}");
         return Ok("Profile Created");
     }
 
-    [HttpPost("update")]
-    public IActionResult Update([FromBody] ProfileInfo profile)
+    [HttpPost("{username}/update")]
+    public IActionResult Update([FromBody] ProfileInfo profile, string username)
     {
+        Console.WriteLine($"Update {username} profile with username:{profile.Username}, bio:{profile.Bio}, displayname:{profile.DisplayName}");
         return Ok("Profile updated");
     }
 
-    [HttpPost("{id}/update-image")]
-    public async Task<IActionResult> UpdateImage([FromBody] IFormFile image, string id)
+    [HttpPost("{username}/update-image")]
+    public async Task<IActionResult> UpdateImage([FromForm] IFormFile image, string username)
     {
-        // read file
+        Console.WriteLine($"Update {username} profile picture");
+
+        if (image == null || image.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        const long maxSizeInBytes = 2 * 1024 * 1024; // 2mb
+        if (image.Length > maxSizeInBytes)
+            return BadRequest("File size exceeds 2MB.");
+
+        var allowedMimeTypes = new[] { "image/jpeg", "image/png" };
+        if (!allowedMimeTypes.Contains(image.ContentType))
+            return BadRequest("Invalid file type. Only JPEG, PNG are allowed.");
+
         try
         {
+            // read file
             using var stream = new MemoryStream();
             await image.CopyToAsync(stream);
             var bytes = stream.ToArray();
 
             // save file
-            System.IO.File.WriteAllBytes(Path.Combine(imagesPath, id + ".jpeg"), bytes);
+            System.IO.File.WriteAllBytes(Path.Combine(imagesPath, username + ".jpeg"), bytes);
             return Ok("");
         }
         catch (Exception ex)
@@ -48,12 +79,14 @@ public class ProfilesController : ControllerBase
         }
     }
 
-    [HttpPost("{id}/image")]
-    public async Task<IActionResult> GetImage(string id)
+    [HttpGet("{username}/image")]
+    public async Task<IActionResult> GetImage(string username)
     {
+        Console.WriteLine($"Get profile picture {username}");
+
         try
         {
-            var path = Path.Combine(imagesPath, id + ".jpeg");
+            var path = Path.Combine(imagesPath, username + ".jpeg");
             if (!System.IO.File.Exists(path))
                 return NotFound();
             var bytes = await System.IO.File.ReadAllBytesAsync(path);
@@ -66,8 +99,26 @@ public class ProfilesController : ControllerBase
     }
 }
 
-public class ProfileInfo {
+public class UserProfile
+{
+    public string Username { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+
+}
+
+public class NewProfileInfo
+{
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ProfileInfo
+{
+    public string Username { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
 }

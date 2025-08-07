@@ -26,7 +26,7 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
                 <AvatarImage imgUrl={chat.imageUrl} size="large"></AvatarImage>
                 <div className="ms-4 me-auto">
                     <div className="flex mb-1">
-                        <p className="me-2 text-2xl">Title</p>
+                        <p className="me-2 text-2xl">{chat.title}</p>
                         <IconButton inverted={true} onClick={onEdit} iconSrc={EditIcon} />
                     </div>
                     <div className="">Members {chat.members.length}</div>
