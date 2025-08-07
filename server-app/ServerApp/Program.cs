@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using ServerApp.DataAccess;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -14,6 +17,10 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
+var connectionString = builder.Configuration.GetConnectionString("main-db");
+builder.Services.AddDbContext<MainDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
