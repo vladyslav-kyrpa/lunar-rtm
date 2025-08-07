@@ -83,7 +83,7 @@ public class ChatsController : ControllerBase
     }
 
     [HttpPost("{id}/update-image")]
-    public async Task<IActionResult> UpdateImage([FromForm] IFormFile image, string id)
+    public async Task<IActionResult> UpdateImage(IFormFile image, string id)
     {
         Console.WriteLine($"Update {id} chat picture");
 
@@ -116,6 +116,7 @@ public class ChatsController : ControllerBase
     }
 
     [HttpPost("{id}/image")]
+    [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK, "image/jpeg")]
     public async Task<IActionResult> GetImage(string id)
     {
         Console.WriteLine($"Get chat picture {id}");

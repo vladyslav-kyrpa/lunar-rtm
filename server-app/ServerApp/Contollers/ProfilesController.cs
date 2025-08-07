@@ -47,7 +47,7 @@ public class ProfilesController : ControllerBase
     }
 
     [HttpPost("{username}/update-image")]
-    public async Task<IActionResult> UpdateImage([FromForm] IFormFile image, string username)
+    public async Task<IActionResult> UpdateImage(IFormFile image, string username)
     {
         Console.WriteLine($"Update {username} profile picture");
 
@@ -80,6 +80,7 @@ public class ProfilesController : ControllerBase
     }
 
     [HttpGet("{username}/image")]
+    [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK, "image/jpeg")]
     public async Task<IActionResult> GetImage(string username)
     {
         Console.WriteLine($"Get profile picture {username}");
