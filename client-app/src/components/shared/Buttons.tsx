@@ -8,13 +8,13 @@ interface ButtonProps {
 
 export function ActiveButton({onClick, children, className}:ButtonProps) {
     return <div onClick={onClick} className={"text-center bg-active border-active-outline p-2 rounded border hover:bg-active-outline " + className}>
-        <p className="text-inverted-text">{children}</p>
+        <div className="text-inverted-text">{children}</div>
     </div>
 }
 
 export function MinorButton({onClick, children, className}:ButtonProps) {
     return <div onClick={onClick} className={"text-center bg-transparent border-active-outline p-2 rounded border hover:bg-on-surface-outline " + className}>
-        <p className="text-main-text">{children}</p>
+        <div className="text-main-text">{children}</div>
     </div>
 }
 

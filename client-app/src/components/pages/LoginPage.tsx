@@ -4,6 +4,7 @@ import GoogleIcon from "../../assets/icons/google.svg";
 import { ActiveButton, TextButton } from "../shared/Buttons";
 import { FormTextBox } from "../shared/TextBoxes";
 import { Block } from "../shared/Blocks";
+import api from "../../api/AuthApi";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -13,7 +14,12 @@ export default function RegisterPage() {
 
     const handleSubmit = () => {
         if (password !== '' && login !== '') {
-            // todo: make an API call
+            api.login(login, password).then((r)=>{
+                console.log("Logged-in");
+                navigate("/");
+            }).catch((error)=> {
+                console.error(error);
+            })
         } else {
             setIsError(true);
         }

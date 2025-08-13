@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FormTextBox } from "../shared/TextBoxes";
 import { ActiveButton, TextButton } from "../shared/Buttons";
 import { Block } from "../shared/Blocks";
-import api from "../../api/ProfilesApi";
+import api from "../../api/AuthApi";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function RegisterPage() {
 
     const handleSubmit = () => {
         if (isFormValid()) {
-            api.createProfile(username, displayName, email, password).then((result) => {
+            api.register(username, displayName, password, email).then((result) => {
                 console.log(result);
                 navigate("/log-in");
             }).catch((error) => {

@@ -1,12 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ServerApp.Controllers;
 
 [ApiController]
-[Route("chats")]
+[Authorize]
+[Route("api/chats")]
 public class ChatsController : ControllerBase
 {
     private const string imagesPath = "/home/admin-user/test-imgs-can-be-removed";
+
+    public record NewChat(string Title, string Description);
 
     [HttpGet("{id}")]
     public IActionResult Get(string id)
@@ -147,12 +151,6 @@ public class Message {
 public class ChatMember
 {
     public string Username { get; set; } = string.Empty;
-}
-
-public class NewChat
-{
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
 }
 
 public class ChatHeader

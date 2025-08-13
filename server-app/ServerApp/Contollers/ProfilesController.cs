@@ -1,29 +1,54 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ServerApp.Controllers;
 
 [ApiController]
-[Route("profiles")]
+[Authorize]
+[Route("api/profiles")]
 public class ProfilesController : ControllerBase
 {
     private const string imagesPath = "/home/admin-user/test-imgs-can-be-removed";
+    private readonly UserManager<UserProfileEntity> _userManager;
+
+    public ProfilesController(UserManager<UserProfileEntity> userManager)
+    {
+        _userManager = userManager;
+    }
+
+    public record UpdatedProfile (string Username, string DisplayName, string Bio);
 
     [HttpGet("{username}")]
-    public IActionResult GetProfile(string username)
+    public async Task<IActionResult> GetProfile(string username)
     {
         Console.WriteLine($"Get profile: @{username}");
-
+        
         if (username == string.Empty || username == "me")
         {
-            return Ok(new UserProfile
+            // TODO: move logic to the ProfilesService
+            // Get the user id from the claims
+            var userId = User?.FindFirst("sub")?.Value ?? User?.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+            if (userId == null)
+                return Unauthorized("User not found in claims.");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            return Ok( new 
             {
-                Username = "current-user-profile",
-                DisplayName = "Current user",
-                Bio = "Just current user",
-                ImageUrl = "http://localhost:5219/profiles/current-user/image"
+                Username = user.UserName,
+                DisplayName = user.DisplayName,
+                Bio = user.Bio,
+                ImageUrl = user.ProfileImageId.ToString() ?? "null"
             });
         }
-        return Ok(new UserProfile
+
+        // TODO: get user from ProfileService
+        return Ok(new
         {
             Username = username,
             DisplayName = username.ToUpper(),
@@ -32,15 +57,8 @@ public class ProfilesController : ControllerBase
         });
     }
 
-    [HttpPost("create")]
-    public IActionResult Create([FromBody] NewProfileInfo profile)
-    {
-        Console.WriteLine($"Create profile username:{profile.Username}, displayname:{profile.DisplayName}, password:{profile.Password}, email:{profile.Email}");
-        return Ok("Profile Created");
-    }
-
     [HttpPost("{username}/update")]
-    public IActionResult Update([FromBody] ProfileInfo profile, string username)
+    public IActionResult Update([FromBody] UpdatedProfile profile, string username)
     {
         Console.WriteLine($"Update {username} profile with username:{profile.Username}, bio:{profile.Bio}, displayname:{profile.DisplayName}");
         return Ok("Profile updated");
@@ -98,28 +116,4 @@ public class ProfilesController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-}
-
-public class UserProfile
-{
-    public string Username { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
-
-}
-
-public class NewProfileInfo
-{
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-}
-
-public class ProfileInfo
-{
-    public string Username { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
 }

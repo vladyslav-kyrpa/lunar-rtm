@@ -2,10 +2,8 @@ import type Chat from "../data-model/Chat";
 import type ChatHeader from "../data-model/ChatHeader";
 import type ChatMessage from "../data-model/ChatMessage";
 
-const url = "http://localhost:5219"
-
 async function fetchChats(): Promise<ChatHeader[]> {
-    const result = await fetch(url + "/chats");
+    const result = await fetch("/api/chats");
     if(result.status === 200){
         // todo: check structure
         return (await result.json()) as ChatHeader[]; 
@@ -16,7 +14,7 @@ async function fetchChats(): Promise<ChatHeader[]> {
 
 async function fetchChat(id: string): Promise<Chat> {
     console.log(id);
-    const result = await fetch(url + "/chats/" + id);
+    const result = await fetch("/api/chats/" + id);
     if(result.status === 200){
         return (await result.json()) as Chat;
     } else {
@@ -25,7 +23,7 @@ async function fetchChat(id: string): Promise<Chat> {
 }
 
 async function fetchMessages(id:string): Promise<ChatMessage[]>{
-    const result = await fetch(url + "/chats/" + id + "/messages");
+    const result = await fetch("/api/chats/" + id + "/messages");
     if(result.ok){
         return (await result.json()) as ChatMessage[];
     } else {
@@ -34,7 +32,7 @@ async function fetchMessages(id:string): Promise<ChatMessage[]>{
 }
 
 async function createChat(title: string, description: string) {
-    const result = await fetch(url + "/chats/create", {
+    const result = await fetch("/api/chats/create", {
         method:"POST",
         headers: {
             "Content-Type":"application/json",
@@ -47,7 +45,7 @@ async function createChat(title: string, description: string) {
 }
 
 async function updateChat(id:string, title?: string, description?: string) {
-    const result = await fetch(url + "/chats/" + id + "/update", {
+    const result = await fetch("/api/chats/" + id + "/update", {
         method:"POST",
         headers: {
             "Content-Type":"application/json",
@@ -60,7 +58,7 @@ async function updateChat(id:string, title?: string, description?: string) {
 }
 
 async function inviteUser(id: string, username: string) {
-    const result = await fetch(url + "/chats/" + id + "/add-member", {
+    const result = await fetch("/api/chats/" + id + "/add-member", {
         method:"POST",
         headers: {
             "Content-Type":"application/json"
@@ -75,7 +73,7 @@ async function inviteUser(id: string, username: string) {
 async function updateImage(id:string, image:File) {
     const formData = new FormData();
     formData.append("image", image);
-    const result = await fetch(url + "/chats/" + id + "/update-image", {
+    const result = await fetch("/api/chats/" + id + "/update-image", {
         method:"POST",
         body: formData 
     });
