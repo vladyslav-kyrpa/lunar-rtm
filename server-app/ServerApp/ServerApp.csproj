@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServerApp.DataAccess\ServerApp.DataAccess.csproj" />
+    <ProjectReference Include="..\ServerApp.BusinessLogic\ServerApp.BusinessLogic.csproj" />
   </ItemGroup>
 
 </Project>
