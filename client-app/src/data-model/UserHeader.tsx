@@ -1,5 +1,5 @@
 export default interface UserHeader {
     username:string;
     displayName:string;
-    imageUrl:string; // smaller size avatar
+    imageId:string; // smaller size avatar
 }

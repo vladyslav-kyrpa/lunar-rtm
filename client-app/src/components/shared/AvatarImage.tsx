@@ -1,22 +1,28 @@
 interface AvatarImageProp {
-    imgUrl:string
+    imgUrl: string
     size: "extra-large" | "large" | "medium" | "small"
-    className?:string
+    className?: string
 }
 
-export default function AvatarImage({imgUrl: iconUrl, size, className}:AvatarImageProp) {
-    let sizeStyle = "h-8 w-8"
-    if(size === "small")
-        sizeStyle = "h-8 w-8"
-    if(size === 'medium')
+export default function AvatarImage({ imgUrl: iconUrl, size, className }: AvatarImageProp) {
+    let sizeStyle = "h-8 w-8";
+    let sizeIndex = 1;
+    if (size === "small") {
+        sizeStyle = "h-8 w-8";
+        sizeIndex = 1;
+    }
+    if (size === 'medium') {
         sizeStyle = "h-12 w-12"
-    if(size === 'large')
+        sizeIndex = 2;
+    }
+    if (size === 'large') {
         sizeStyle = "h-[72px] w-[72px]"
-    if(size === 'extra-large')
+        sizeIndex = 3;
+    }
+    if (size === 'extra-large') {
         sizeStyle = "h-[208px] w-[208px]"
-
-    return <img src={iconUrl} 
-        className={sizeStyle + " rounded-full bg-black border-2 cus-outline " + className}/> 
+        sizeIndex = 3;
+    }
+    return <img src={iconUrl + "?size=" + sizeIndex.toString()}
+        className={sizeStyle + " rounded-full bg-black border-2 cus-outline " + className} />
 }
-
-

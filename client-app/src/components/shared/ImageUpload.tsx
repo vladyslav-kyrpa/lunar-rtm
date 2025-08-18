@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import AvatarImage from "./AvatarImage";
 import { MinorButton } from "./Buttons";
 import { OnSurfaceBlock } from "./Blocks";
 
@@ -37,7 +36,8 @@ export default function ImageUpload({onChange, className}:ImageUploadProps) {
     }, [file]);
 
     return <OnSurfaceBlock className={"flex flex-col items-center " + className}>
-        {imgUrl && <AvatarImage className="mb-5" size="extra-large" imgUrl={imgUrl}/>}
+        {imgUrl && <img src={imgUrl} 
+            className="mb-5 rounded-full bg-black border-2 cus-outline h-[250px] w-[250px]" />}
         <input
             id="file-upload"
             type="file"

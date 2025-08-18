@@ -37,7 +37,7 @@ async function createChat(title: string, description: string) {
         headers: {
             "Content-Type":"application/json",
         },
-        body: JSON.stringify({title, description})
+        body: JSON.stringify({title, description, type:3}) // TODO: add type selection
     });
     if(!result.ok){
         throw Error("Failed to create chat: " + result.statusText);

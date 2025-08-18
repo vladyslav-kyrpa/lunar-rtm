@@ -62,7 +62,7 @@ export default function ProfilePage() {
     }
     return <div className="flex flex-col mx-auto w-[500px] p-2">
         <Block className="mt-15 flex flex-col items-center">
-            <AvatarImage size="extra-large" imgUrl={profile.imageUrl} />
+            <AvatarImage size="extra-large" imgUrl={"/api/images/profile-avatar/" + profile.imageId} />
             <div className="flex mb-1 mt-3">
                 <p className="text-2xl">{profile.displayName}</p>
                 {isCurrentUser && <div className="ms-auto">

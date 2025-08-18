@@ -4,6 +4,6 @@ export default interface Chat {
     id:string;
     title:string;
     description: string;
-    imageUrl:string;
+    imageId:string;
     members:UserHeader[]
 }

@@ -45,7 +45,12 @@ internal class Program
         // define services
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IChatsService, ChatsServices>();
+        builder.Services.AddScoped<IImagesService, ImagesService>();
 
+        builder.Services.AddScoped<IAvatarRepository<ProfileImageEntity>, ProfileImageRepository>();
+        builder.Services.AddScoped<IAvatarRepository<ChatImageEntity>, ChatImageRepository>();
+        builder.Services.AddScoped<IChatRepository, ChatRepository>();
+        builder.Services.AddScoped<IMessageRepository, MessageRepository>();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
