@@ -7,21 +7,35 @@ namespace ServerApp.BusinessLogic.Common;
 /// <typeparam name="T">The type of the value when operation succeeds.</typeparam>
 public class Result<T>
 {
+    private T? value;
+
     public bool Success { get; set; }
 
     public bool IsFailed { get => !Success; }
 
-    public List<string> Errors { get; set; } = [];
+    public string? Error { get; set; }
+
 
     public T Value
     {
         get
         {
-            if (Success)
-                return Value;
+            if (Success && value != null)
+                return value;
             throw new InvalidOperationException(
                 "Can't get value if the result is not Success");
         }
+    }
+
+    public static Result<T> Ok(T value)
+    {
+        var r = new Result<T> { Success = true };
+        r.value = value;
+        return r;
+    }
+
+    public static Result<T> Fail(string error) {
+        return new Result<T> { Success = false, Error = error };
     }
 }
 

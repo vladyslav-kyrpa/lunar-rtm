@@ -34,19 +34,17 @@ public class ChatRepository : IChatRepository
         var guidId = Guid.Parse(id);
         var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == guidId);
         if (chat == null)
-            throw new ArgumentException(nameof(id), "Chat was not found");
+            throw new ArgumentException("Chat was not found", nameof(id));
         chat.MemberIDs.Add(memberId);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ChatEntity> Get(string id)
+    public async Task<ChatEntity?> Get(string id)
     {
         var guidId = Guid.Parse(id);
         return await _context.Chats
-            .AsNoTracking()
             .Include(x => x.Owner)
-            .FirstOrDefaultAsync(c => c.Id == guidId)
-            ?? throw new ArgumentException(nameof(id), "Chat was not found");
+            .FirstOrDefaultAsync(c => c.Id == guidId);
     }
 
     public IQueryable<ChatEntity> GetList(string userId)
@@ -59,7 +57,9 @@ public class ChatRepository : IChatRepository
     public async Task<bool> IsExists(string id)
     {
         var guidId = Guid.Parse(id);
-        return await _context.Chats.AnyAsync(c => c.Id == guidId);
+        return await _context.Chats
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == guidId);
     }
 
     public async Task Remove(string id)
@@ -67,7 +67,7 @@ public class ChatRepository : IChatRepository
         var guidId = Guid.Parse(id);
         var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == guidId);
         if (chat == null)
-            throw new ArgumentException(nameof(id), "Chat was not found");
+            throw new ArgumentException("Chat was not found", nameof(id));
 
         _context.Chats.Remove(chat);
         await _context.SaveChangesAsync();
@@ -78,7 +78,8 @@ public class ChatRepository : IChatRepository
         var guidId = Guid.Parse(id);
         var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == guidId);
         if (chat == null)
-            throw new ArgumentException(nameof(id), "Chat was not found");
+            throw new ArgumentException("Chat was not found", nameof(id));
+
         chat.MemberIDs.Remove(memberId);
         await _context.SaveChangesAsync();
     }
@@ -86,13 +87,13 @@ public class ChatRepository : IChatRepository
     public async Task Update(ChatEntity chat)
     {
         if (!IsChatValid(chat))
-            throw new ArgumentException(nameof(chat), "Invalid chat entity");
+            throw new ArgumentException("Invalid chat entity", nameof(chat));
 
         _context.Chats.Update(chat);
         await _context.SaveChangesAsync();
     }
 
     private bool IsChatValid(ChatEntity chat)
-        => chat != null && chat.Id == Guid.Empty
+        => chat != null && chat.Id != Guid.Empty
             && chat.OwnerId != string.Empty;
 }

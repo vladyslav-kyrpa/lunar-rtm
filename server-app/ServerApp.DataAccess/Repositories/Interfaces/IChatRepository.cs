@@ -8,7 +8,7 @@ public interface IChatRepository
     Task AddMember(string id, string memberId);
     Task RemoveMember(string id, string memberId);
     Task Remove(string id);
-    Task<ChatEntity> Get(string id);
+    Task<ChatEntity?> Get(string id);
     Task Update(ChatEntity chat);
     IQueryable<ChatEntity> GetList(string userId);
     Task<bool> IsExists(string id);

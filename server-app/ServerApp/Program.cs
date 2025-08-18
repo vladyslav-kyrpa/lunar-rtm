@@ -44,6 +44,7 @@ internal class Program
 
         // define services
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IChatsService, ChatsServices>();
 
         var app = builder.Build();
 

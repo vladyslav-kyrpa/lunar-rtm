@@ -7,12 +7,10 @@ namespace ServerApp.DataAccess.Repositories;
 public class ProfileImageRepository : IAvatarRepository<ProfileImageEntity>
 {
     private readonly MainDbContext _context;
-    private readonly ILogger<ProfileImageRepository> _logger;
 
-    public ProfileImageRepository(MainDbContext context, ILogger<ProfileImageRepository> logger)
+    public ProfileImageRepository(MainDbContext context)
     {
         _context = context;
-        _logger = logger;
     }
 
     public async Task<ImageEntity?> Get(string id, ImageSize size)
@@ -46,7 +44,6 @@ public class ProfileImageRepository : IAvatarRepository<ProfileImageEntity>
 
     public async Task UpdateOrAddAvatar(ProfileImageEntity avatar)
     {
-        _logger.LogDebug("Update profile image in DB: @{Image}", avatar);
         if (await _context.ProfileImages.AnyAsync(e => e.Id == avatar.Id))
             _context.ProfileImages.Update(avatar);
         else
