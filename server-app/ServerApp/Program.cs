@@ -2,14 +2,19 @@
 using Microsoft.EntityFrameworkCore;
 using ServerApp.DataAccess;
 using Microsoft.AspNetCore.Identity;
-using ServerApp.Services.Interfaces;
-using ServerApp.Services;
+using ServerApp.DataAccess.Repositories.Interfaces;
+using ServerApp.DataAccess.Repositories;
+using ServerApp.BusinessLogic.Services.Interfaces;
+using ServerApp.BusinessLogic.Services;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();

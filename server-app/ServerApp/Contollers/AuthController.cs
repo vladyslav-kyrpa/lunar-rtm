@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ServerApp.Services.Interfaces;
+using ServerApp.BusinessLogic.Services.Interfaces;
 
 namespace ServerApp.Controllers;
 
@@ -21,21 +21,24 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        await _authService.RegisterUser(
+        var result = await _authService.RegisterUser(
             request.UserName, request.Password,
             request.DisplayName, request.Email);
 
-        return Ok("User registered successfully.");
+        if(result.Success)
+            return Ok("User registered successfully.");
+        return BadRequest(result.Error);
     }
 
     [HttpPost("log-in")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var isAuthenticated = await _authService.LoginUser(
+        var result = await _authService.LoginUser(
             request.UserName, request.Password);
-        if(isAuthenticated)
-            return Ok("Login successful.");
-        return Unauthorized("Invalid username or password");
+            
+        if(result.Success)
+            return Ok("Logged-in.");
+        return Unauthorized(result.Error);
     }
 
     [Authorize]
