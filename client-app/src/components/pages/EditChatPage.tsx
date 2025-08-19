@@ -3,7 +3,6 @@ import type Chat from "../../data-model/Chat";
 import api from "../../api/ChatsApi";
 import { Block } from "../shared/Blocks";
 import { FormTextBox } from "../shared/TextBoxes";
-import ImageUpload from "../shared/ImageUpload";
 import { MinorButton } from "../shared/Buttons";
 
 interface EditChatFormData {
@@ -21,7 +20,6 @@ interface EditChatPageProps {
 export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPageProps) {
     const [newTitle, setNewTitle] = useState(chat.title);
     const [newDescription, setNewDescription] = useState(chat.description);
-    const [newImage, setNewImage] = useState<File>();
 
     const handleInput = (value: string, param: string) => {
         if (param === "title")
@@ -38,17 +36,6 @@ export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPagePr
 
         api.updateChat(chat.id, newTitle, newDescription).then((result) => {
             console.log(result);
-            if(!newImage)
-                return;
-            return api.updateImage(chat.id, newImage);
-        }).then((result)=>{
-            console.log(result);
-            const data: EditChatFormData = {
-                title: newTitle,
-                description: newDescription,
-                image: newImage
-            }
-            onSubmit(data);
         }).catch((error) => {
             console.error(error);
         });
@@ -68,7 +55,7 @@ export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPagePr
                 placeholder="Enter description..."
                 isError={newDescription === ""} />
             <label className="mt-5 mb-2">New Image</label>
-            <ImageUpload onChange={setNewImage} />
+
             <MinorButton className="mt-5 mb-2 w-full" onClick={handleOnSubmit}>Save</MinorButton>
             <MinorButton className="w-full" onClick={onClose}>Cancel</MinorButton>
         </Block>

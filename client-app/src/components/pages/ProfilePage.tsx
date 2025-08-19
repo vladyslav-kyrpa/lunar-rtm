@@ -3,12 +3,13 @@ import LoadingScreen from "../shared/LoadingScreen";
 import type UserProfile from "../../data-model/UserProflie";
 import { useNavigate, useParams } from "react-router-dom";
 import { FormTextBox } from "../shared/TextBoxes";
-import { IconButton, MinorButton } from "../shared/Buttons";
+import { ActiveButton, IconButton, MinorButton } from "../shared/Buttons";
 import { Block } from "../shared/Blocks";
 import ImageUpload from "../shared/ImageUpload";
 import api from "../../api/ProfilesApi";
-import AvatarImage from "../shared/AvatarImage";
 import EditIcon from "../../assets/icons/edit.svg"
+import useNotification from "../hooks/useNotification";
+import BlockNotification from "../shared/BlockNotification";
 
 export default function ProfilePage() {
     const { username } = useParams();
@@ -60,19 +61,73 @@ export default function ProfilePage() {
     if (isEditMode) {
         return <EditProfilePage user={profile} onSave={handleOnSave} onClose={handleOnCancel} />
     }
-    return <div className="flex flex-col mx-auto w-[500px] p-2">
-        <Block className="mt-15 flex flex-col items-center">
-            <AvatarImage size="extra-large" imgUrl={"/api/images/profile-avatar/" + profile.imageId} />
-            <div className="flex mb-1 mt-3">
-                <p className="text-2xl">{profile.displayName}</p>
-                {isCurrentUser && <div className="ms-auto">
-                    <IconButton className="ms-2" inverted={true} onClick={handleOnEdit} iconSrc={EditIcon} />
-                </div>}
-            </div>
-            <p className="text-minor-text mb-5">username: {profile.username}</p>
-            <p className="">{profile.bio}</p>
+    return <div className="mx-auto p-2 max-w-[500px]">
+        <Block className="mt-15 flex-col flex items-center">
+            <p className="font-bold text-center mb-5">User Profile</p>
+            <ProfilePicture profile={profile} isCurrent={isCurrentUser} />
+                <p className="text-2xl mt-5 text-center">{profile.displayName}</p>
+                <p className="text-minor-text mb-5">username: {profile.username}</p>
+                <p className="mb-5">{profile.bio}</p>
+                {isCurrentUser && <MinorButton onClick={handleOnEdit}>Edit profile</MinorButton>}
         </Block>
     </div>
+}
+interface ProfilePictureProps {
+    profile: UserProfile,
+    isCurrent: boolean
+}
+function ProfilePicture({ profile, isCurrent }: ProfilePictureProps) {
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [image, setImage] = useState<File | undefined>();
+    const [errorText, isError, showError, hideError] = useNotification();
+
+    const handleOnSave = () => {
+        if (!image) {
+            showError("Select image first");
+            return;
+        }
+
+        api.updateImage(profile.username, image).then((_) => {
+            handleOnChange();
+        }).catch((e) => {
+            console.error(e);
+            showError("Failed to update an image");
+        });
+    }
+    const handleImageUpload = (image: File) => {
+        setImage(image);
+        hideError();
+    }
+    const handleOnChange = () => {
+        setIsUpdate(!isUpdate);
+        setImage(undefined);
+        hideError();
+    }
+
+    if (isUpdate) {
+        return <Block className="w-full">
+            <p className="font-bold text-center mb-5">Update profile picture</p>
+
+            {isError && <BlockNotification className="mb-5" text={errorText}/>}
+
+            <ImageUpload onChange={handleImageUpload} />
+
+            <ActiveButton className="mt-4" onClick={handleOnSave}>Save selected image</ActiveButton>
+            <MinorButton className="mt-4" onClick={handleOnChange}>Cancel</MinorButton>
+        </Block>
+    } else {
+        return <div className="relative">
+            <div className="h-full w-full">
+                <img className="w-[250px] h-[250px] rounded-[0.5rem] border-2 border-outline" src={"/api/images/profile-avatar/" + profile.imageId + "?size=3"} alt="profile-avatar" />
+            </div>
+            {isCurrent && <IconButton 
+                className="absolute top-0 right-0 m-3"
+                inverted={true}
+                iconSrc={EditIcon}
+                onClick={handleOnChange} />
+            }
+        </div>
+    }
 }
 
 
@@ -82,12 +137,13 @@ interface EditProfilePageProps {
     onClose: () => void;
 }
 function EditProfilePage({ user, onSave, onClose }: EditProfilePageProps) {
+    const [errorText, isError, showError, hideError] = useNotification();
     const [newUsername, setNewUsername] = useState(user.username);
     const [newDisplayName, setNewDisplayName] = useState(user.displayName);
     const [newBio, setNewBio] = useState(user.bio);
-    const [image, setImage] = useState<File>();
 
     const handleInput = (value: string, param: string) => {
+        hideError();
         if (param === "username")
             setNewUsername(value);
         if (param === "displayName")
@@ -98,24 +154,23 @@ function EditProfilePage({ user, onSave, onClose }: EditProfilePageProps) {
 
     const handleOnSave = () => {
         if (newUsername === "" || newDisplayName === "" || newBio === "") {
-            console.error("Form values should be not empty");
+            showError("Fill all required fields");
             return;
         }
 
         api.updateProfile(user.username, newUsername, newDisplayName, newBio).then((_) => {
-            if(!image) 
-                return;
-            return api.updateImage(newUsername, image);
-        }).then((_)=>{
             onSave(newUsername);
-        }).catch((e) => {
-            console.error(e);
-        })
+        }).catch((_) => {
+            showError("Failed to update profile");
+        });
     }
 
     return <div className="w-[500px] mx-auto">
         <Block className="flex flex-col mt-15">
             <p className="font-bold text-center mb-5">Edit profile</p>
+
+            {isError && <BlockNotification className="mb-5" text={errorText} />}
+
             <label className="mb-2">Username</label>
             <FormTextBox value={newUsername}
                 className="mb-5"
@@ -136,9 +191,6 @@ function EditProfilePage({ user, onSave, onClose }: EditProfilePageProps) {
                 isError={newBio === ""}
                 placeholder="Enter bio..."
                 onChange={(e) => handleInput(e, "bio")} />
-
-            <label className="mb-2">Image</label>
-            <ImageUpload className="mb-5" onChange={setImage} />
 
             <MinorButton className="mb-2 w-full" onClick={handleOnSave}>Save</MinorButton>
             <MinorButton className="w-full" onClick={onClose}>Cancel</MinorButton>

@@ -32,12 +32,15 @@ export default function ImageUpload({onChange, className}:ImageUploadProps) {
         setImageUrl(objectUrl);
 
         // Free memory on re-render 
-        return () => { console.log("Clean-up"); URL.revokeObjectURL(objectUrl) };
+        return () => { 
+            console.log("Clean-up"); 
+            URL.revokeObjectURL(objectUrl) 
+        };
     }, [file]);
 
     return <OnSurfaceBlock className={"flex flex-col items-center " + className}>
         {imgUrl && <img src={imgUrl} 
-            className="mb-5 rounded-full bg-black border-2 cus-outline h-[250px] w-[250px]" />}
+            className="mb-5 rounded-[0.5rem] bg-black border-2 cus-outline h-[250px] w-[250px]" />}
         <input
             id="file-upload"
             type="file"
