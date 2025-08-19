@@ -21,32 +21,28 @@ public class ImagesController : ControllerBase
     public async Task<IActionResult> GetProfileImage(string id, int size)
     {
         _logger.LogInformation("Get user profile image @{Id} in size @{Size}", id, size);
-        try
-        {
-            var image = await _images.GetProfileImage(id, (AvatarSize)size);
-            var type = image.Type.ToString().ToLower();
-            return File(image.Bytes, $"image/{type}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to get user profile image: @{Ex}", ex);
-            return BadRequest(ex.Message);
-        }
+        var result = await _images.GetProfileImage(id, (AvatarSize)size);
+        if (result.IsFailed)
+            return BadRequest(result.Error);
+
+        var image = result.Value; 
+
+        var type = image.Type.ToString().ToLower();
+        return File(image.Bytes, $"image/{type}");
     }
 
     [HttpGet("chat-avatar/{id}")]
     [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK, "image/webp")]
     public async Task<IActionResult> GetChatImage(string id, int size)
     {
-        try
-        {
-            var image = await _images.GetChatImage(id, (AvatarSize)size);
-            var type = image.Type.ToString().ToLower();
-            return File(image.Bytes, $"image/{type}");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        _logger.LogInformation("Get chat image @{Id} in size @{Size}", id, size);
+        var result = await _images.GetChatImage(id, (AvatarSize)size);
+        if (result.IsFailed)
+            return BadRequest(result.Error);
+
+        var image = result.Value; 
+
+        var type = image.Type.ToString().ToLower();
+        return File(image.Bytes, $"image/{type}");
     }
 }

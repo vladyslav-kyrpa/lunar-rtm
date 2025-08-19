@@ -23,7 +23,7 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
     return <div className="h-screen flex flex-col p-3">
         <Block>
             <div className="flex flex-row items-start mb-5">
-                <AvatarImage imgUrl={"/api/images/profile-avatar/" + chat.imageId} size="large"></AvatarImage>
+                <AvatarImage imgUrl={"/api/images/chat-avatar/" + chat.imageId} size="large"></AvatarImage>
                 <div className="ms-4 me-auto">
                     <div className="flex mb-1">
                         <p className="me-2 text-2xl">{chat.title}</p>
@@ -50,15 +50,14 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
 
 interface UserListItemProps {
     user: UserHeader,
-    key: number
 }
 
-function UserListItem({ user, key }: UserListItemProps) {
+function UserListItem({ user }: UserListItemProps) {
     const navigate = useNavigate();
     const handleOnClick = () => {
         navigate("/profile/" + user.username);
     }
-    return <div onClick={handleOnClick} key={key} className="mb-1">
+    return <div onClick={handleOnClick} className="mb-1">
         <OnSurfaceBlock className="mt-1 flex items-center hover:bg-on-surface-outline">
             <AvatarImage size="small" imgUrl={"/api/images/profile-avatar/" + user.imageId}></AvatarImage>
             <p className="ms-2">{user.displayName} (@{user.username})</p>

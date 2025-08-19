@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using ServerApp.DataAccess.Repositories.Interfaces;
 
 namespace ServerApp.DataAccess.Repositories;
@@ -48,7 +47,6 @@ public class ProfileImageRepository : IAvatarRepository<ProfileImageEntity>
             _context.ProfileImages.Update(avatar);
         else
             _context.ProfileImages.Add(avatar);
-
         await _context.SaveChangesAsync();
     }
 }

@@ -38,7 +38,7 @@ function ChatsList({ items, onSelected }: ChatsListProps) {
     return items.map((item, key) => <ChatListItem key={key}
         title={item.title}
         id={item.id}
-        iconUrl={"/api/chat-avatar/" + item.imageId}
+        iconUrl={"/api/images/chat-avatar/" + item.imageId}
         newMessages={item.newMessagesCount}
         onSelected={onSelected} />
     )

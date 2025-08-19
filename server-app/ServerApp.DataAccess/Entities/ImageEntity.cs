@@ -4,7 +4,7 @@ public class ProfileImageEntity
 {
     public Guid Id { get; set; }
     public string ProfileId { get; set; }
-    public UserProfileEntity? Profile { get; set; }
+    public UserProfileEntity Profile { get; set; }
     public byte[] BytesSmall { get; set; } = [];
     public byte[] BytesMedium { get; set; } = [];
     public byte[] BytesLarge { get; set; } = [];
@@ -14,7 +14,7 @@ public class ChatImageEntity
 {
     public Guid Id { get; set; }
     public Guid ChatId { get; set; }
-    public ChatEntity? Chat { get; set; }
+    public ChatEntity Chat { get; set; }
     public byte[] BytesSmall { get; set; } = [];
     public byte[] BytesMedium { get; set; } = [];
     public byte[] BytesLarge { get; set; } = [];

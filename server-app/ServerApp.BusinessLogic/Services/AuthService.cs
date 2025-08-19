@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using ServerApp.BusinessLogic.Common;
 using ServerApp.BusinessLogic.Services.Interfaces;
@@ -29,9 +28,9 @@ public class AuthService : IAuthService
 
     public async Task<Result> RegisterUser(string username, string password, string? displayName, string email)
     {
-        if (!InputValidator.IsUsernameValid(username))
+        if (!UserProfileInputValidator.IsUsernameValid(username))
             return Result.Fail("Username is invalid");
-        if (!InputValidator.IsEmailValid(email))
+        if (!UserProfileInputValidator.IsEmailValid(email))
             return Result.Fail("Email is invalid");
         if (await _signInManager.UserManager.FindByNameAsync(username) != null)
             return Result.Fail("Username is already taken");
@@ -57,29 +56,5 @@ public class AuthService : IAuthService
     public async Task LogoutUser()
     {
         await _signInManager.SignOutAsync();
-    }
-}
-
-public class InputValidator
-{
-    public static bool IsUsernameValid(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-            throw new ArgumentNullException(nameof(value), "Username is null or empty");
-
-        if (value.Length < 2 || value.Length > 64)
-                return false;
-
-        var allowedChars = "abcdefghijklmnopqrstuvwxyz1234567890.-_";
-        foreach (var c in value)
-            if(!allowedChars.Contains(c)) return false;
-        return true;
-    }
-
-    public static bool IsEmailValid(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-            throw new ArgumentNullException(nameof(value), "Email is null or empty");
-        return Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 }

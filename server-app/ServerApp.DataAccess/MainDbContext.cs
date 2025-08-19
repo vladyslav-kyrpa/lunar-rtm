@@ -36,20 +36,14 @@ public class MainDbContext : IdentityDbContext<UserProfileEntity>
 
         builder.Entity<ChatImageEntity>()
             .HasKey(x => x.Id);
-        builder.Entity<ChatImageEntity>()
-            .HasOne(x => x.Chat)
-            .WithOne()
-            .HasForeignKey<ChatImageEntity>(x => x.ChatId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<ChatEntity>()
             .HasKey(x => x.Id);
         builder.Entity<ChatEntity>()
-            .HasOne(x => x.Image)
-            .WithOne()
-            .HasForeignKey<ChatEntity>(x => x.ImageId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasOne(x => x.Image) // Chat has one img
+            .WithOne(x=>x.Chat) // Image belongs to one chat
+            .HasForeignKey<ChatImageEntity>(x => x.ChatId)
+            .OnDelete(DeleteBehavior.Cascade); // delete image when chat it deleted
 
         builder.Entity<MessageEntity>()
             .HasKey(x => x.Id);

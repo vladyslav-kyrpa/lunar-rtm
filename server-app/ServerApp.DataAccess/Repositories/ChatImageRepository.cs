@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ServerApp.DataAccess.Repositories.Interfaces;
 
@@ -19,16 +18,13 @@ public class ChatImageRepository: IAvatarRepository<ChatImageEntity>
         var imgs = _context.ChatImages.Where(x => x.Id == guidId);
 
         if (size == ImageSize.Small)
-            return await imgs
-                .Select(e => new ImageEntity { Id = e.Id, Bytes = e.BytesSmall })
+            return await imgs.Select(img => new ImageEntity { Id = img.Id, Bytes = img.BytesSmall })
                 .FirstOrDefaultAsync();
         if (size == ImageSize.Medium)
-            return await imgs
-                .Select(e => new ImageEntity { Id = e.Id, Bytes = e.BytesMedium })
+            return await imgs.Select(img => new ImageEntity { Id = img.Id, Bytes = img.BytesMedium })
                 .FirstOrDefaultAsync();
         if (size == ImageSize.Large)
-            return await imgs
-                .Select(e => new ImageEntity { Id = e.Id, Bytes = e.BytesLarge })
+            return await imgs.Select(img => new ImageEntity { Id = img.Id, Bytes = img.BytesLarge })
                 .FirstOrDefaultAsync();
 
         throw new ArgumentException(nameof(size), "Unsupported size");
@@ -44,10 +40,13 @@ public class ChatImageRepository: IAvatarRepository<ChatImageEntity>
 
     public async Task UpdateOrAddAvatar(ChatImageEntity avatar)
     {
-        if (await _context.ProfileImages.AnyAsync(e => e.Id == avatar.Id))
-            _context.ChatImages.Add(avatar);
-        else
+        if (await _context.ChatImages.AnyAsync(e => e.Id == avatar.Id))
             _context.ChatImages.Update(avatar);
+        else
+            _context.ChatImages.Add(avatar);
+
+        var chat = await _context.Chats.FirstAsync(c => c.Id == avatar.ChatId);
+        chat.ImageId = avatar.Id;
 
         await _context.SaveChangesAsync();
     }
