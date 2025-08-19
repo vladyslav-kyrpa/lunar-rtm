@@ -16,8 +16,8 @@ public class AuthServiceIntTests
     {
         // Setup db
         var options = new DbContextOptionsBuilder<MainDbContext>()
-            //.UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}").Options;
-            .UseInMemoryDatabase($"TestDb-{Guid.NewGuid}").Options;
+            //.UseInMemoryDatabase($"TestDb").Options;
+            .UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}").Options;
         _context = new MainDbContext(options);
 
         // Setup Identity services

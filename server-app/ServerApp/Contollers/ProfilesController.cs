@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ServerApp.BusinessLogic.Common;
+using ServerApp.BusinessLogic.Models;
+using ServerApp.BusinessLogic.Services.Interfaces;
 
 namespace ServerApp.Controllers;
 
@@ -9,65 +11,80 @@ namespace ServerApp.Controllers;
 [Route("api/profiles")]
 public class ProfilesController : ControllerBase
 {
-    private const string imagesPath = "/home/admin-user/test-imgs-can-be-removed";
-    private readonly UserManager<UserProfileEntity> _userManager;
+    private readonly IAuthService _auth;
+    private readonly IProfilesService _profiles;
+    private readonly ILogger<ProfilesController> _logger;
 
-    public ProfilesController(UserManager<UserProfileEntity> userManager)
+    public ProfilesController(IProfilesService profiles,
+        IAuthService auth,
+        ILogger<ProfilesController> logger)
     {
-        _userManager = userManager;
+        _profiles = profiles;
+        _auth = auth;
+        _logger = logger;
     }
 
-    public record UpdatedProfile (string Username, string DisplayName, string Bio);
+    public record UpdatedProfile(string Username, string DisplayName, string Bio);
 
     [HttpGet("{username}")]
     public async Task<IActionResult> GetProfile(string username)
     {
-        Console.WriteLine($"Get profile: @{username}");
-        
+        Result<UserProfile> result;
+
         if (username == string.Empty || username == "me")
         {
-            // TODO: move logic to the ProfilesService
-            // Get the user id from the claims
-            var userId = User?.FindFirst("sub")?.Value ?? User?.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-
-            if (userId == null)
-                return Unauthorized("User not found in claims.");
-
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-                return NotFound("User not found.");
-
-            return Ok( new 
-            {
-                Username = user.UserName,
-                DisplayName = user.DisplayName,
-                Bio = user.Bio,
-                ImageUrl = user.ProfileImageId.ToString() ?? "null"
-            });
+            var currentUser = User?.Identity?.Name;
+            if (currentUser == null)
+                return Unauthorized("User is not authenticated");
+            result = await _profiles.GetByUsername(currentUser);
+        }
+        else
+        {
+            result = await _profiles.GetByUsername(username);
         }
 
-        // TODO: get user from ProfileService
-        return Ok(new
-        {
-            Username = username,
-            DisplayName = username.ToUpper(),
-            Bio = "Just user",
-            ImageUrl = "http://localhost:5219/profiles/none/image"
-        });
+        return result.Success ? Ok(result.Value)
+            : BadRequest(result.Error);
     }
 
     [HttpPost("{username}/update")]
-    public IActionResult Update([FromBody] UpdatedProfile profile, string username)
+    public async Task<IActionResult> Update([FromBody] UpdatedProfile profile, string username)
     {
-        Console.WriteLine($"Update {username} profile with username:{profile.Username}, bio:{profile.Bio}, displayname:{profile.DisplayName}");
-        return Ok("Profile updated");
+        var currentUser = User?.Identity?.Name;
+        if (currentUser == null)
+            return Unauthorized("Cannot get current user");
+        if (currentUser != username)
+            return BadRequest("You have no rights to delete this profile");
+
+        var result = await _profiles.Update(currentUser, profile.Username, profile.DisplayName, profile.Bio);
+
+        return result.Success ? Ok("Profile updated")
+            : BadRequest(result.Error);
+    }
+
+    [HttpGet("{username}/delete")]
+    public async Task<IActionResult> DeleteProfile(string username)
+    {
+        var currentUser = User?.Identity?.Name; 
+        if (currentUser == null)
+            return Unauthorized("Cannot get current user");
+        if (currentUser != username)
+            return BadRequest("You have no rights to delete this profile");
+
+        var result = await _profiles.Delete(username);
+        await _auth.LogoutUser();
+
+        return result.Success
+            ? Ok("User profile was deleted permanently")
+            : BadRequest(result.Error);
     }
 
     [HttpPost("{username}/update-image")]
     public async Task<IActionResult> UpdateImage(IFormFile image, string username)
     {
-        Console.WriteLine($"Update {username} profile picture");
+        _logger.LogInformation("User @{Username} updates profile image", username);
+        if (username != User?.Identity?.Name)
+            return BadRequest("You have no rights to change this image");
 
         if (image == null || image.Length == 0)
             return BadRequest("No file uploaded.");
@@ -77,43 +94,17 @@ public class ProfilesController : ControllerBase
             return BadRequest("File size exceeds 2MB.");
 
         var allowedMimeTypes = new[] { "image/jpeg", "image/png" };
+
         if (!allowedMimeTypes.Contains(image.ContentType))
             return BadRequest("Invalid file type. Only JPEG, PNG are allowed.");
 
-        try
-        {
-            // read file
-            using var stream = new MemoryStream();
-            await image.CopyToAsync(stream);
-            var bytes = stream.ToArray();
+        using var stream = new MemoryStream();
+        await image.CopyToAsync(stream);
+        var bytes = stream.ToArray();
 
-            // save file
-            System.IO.File.WriteAllBytes(Path.Combine(imagesPath, username + ".jpeg"), bytes);
-            return Ok("");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+        var result = await _profiles.UpdateImage(username, bytes);
 
-    [HttpGet("{username}/image")]
-    [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK, "image/jpeg")]
-    public async Task<IActionResult> GetImage(string username)
-    {
-        Console.WriteLine($"Get profile picture {username}");
-
-        try
-        {
-            var path = Path.Combine(imagesPath, username + ".jpeg");
-            if (!System.IO.File.Exists(path))
-                return NotFound();
-            var bytes = await System.IO.File.ReadAllBytesAsync(path);
-            return File(bytes, "image/jpeg");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return result.Success ? Ok("Profile image updated") 
+            : BadRequest(result.Error);
     }
 }
