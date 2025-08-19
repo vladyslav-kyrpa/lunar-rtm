@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
             request.UserName, request.Password,
             request.DisplayName, request.Email);
 
-        if(result.Success)
+        if (result.Success)
             return Ok("User registered successfully.");
         return BadRequest(result.Error);
     }
@@ -35,8 +35,8 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.LoginUser(
             request.UserName, request.Password);
-            
-        if(result.Success)
+
+        if (result.Success)
             return Ok("Logged-in.");
         return Unauthorized(result.Error);
     }
@@ -47,5 +47,12 @@ public class AuthController : ControllerBase
     {
         await _authService.LogoutUser();
         return Ok("Logged-out");
+    }
+
+    [Authorize]
+    [HttpGet("check")]
+    public IActionResult CheckAuth()
+    {
+        return Ok("Authenticated");
     }
 }

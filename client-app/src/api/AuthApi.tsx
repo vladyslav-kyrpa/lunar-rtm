@@ -33,4 +33,19 @@ export async function login(username: string, password: string) {
     }
 }
 
-export default { register, login }
+export async function logout(){
+    var result = await fetch("/api/auth/log-out", {
+        credentials: "include", 
+    });
+    return result.status == 200;
+}
+
+export async function isAuthenticated():Promise<boolean> {
+    console.log("Check auth");
+    var result = await fetch("/api/auth/check", {
+        credentials: "include", 
+    });
+    return result.status == 200;
+}
+
+export default { register, login, isAuthenticated }
