@@ -14,6 +14,7 @@ import api from "../../api/ChatsApi";
 import AvatarImage from "../shared/AvatarImage";
 import EditIcon from "../../assets/icons/edit.svg";
 import CloseIcon from "../../assets/icons/close.svg";
+import { getCurrentUsername } from "../../utils/CurrentUser";
 
 
 interface ChatDetailsPageProps {
@@ -25,8 +26,7 @@ interface ChatDetailsPageProps {
 
 export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: ChatDetailsPageProps) {
     const [usernameText, setUsernameText] = useState("");
-    // TODO: fetch info about user permitions
-    const canEdit = true; // just for now
+    const isOwner = chat.owner.username == getCurrentUsername();
 
     return <div className="h-screen flex-col p-3 pt-15 w-[500px] mx-auto">
         <Block className="flex flex-col items-center">
@@ -37,21 +37,22 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
                     className="ms-auto"/>
             </div>
 
-            <ChatPicture chat={chat} canEdit={canEdit}/>
+            <ChatPicture chat={chat} canEdit={isOwner}/>
             <p className="me-2 mt-5 text-2xl">{chat.title}</p>
             <p className="text-minor-text mb-5">Members: {chat.members.length}</p>
             <p className="mb-5">{chat.description}</p>
 
-            <MinorButton onClick={onEdit} >Edit chat</MinorButton>
+            {isOwner && <MinorButton onClick={onEdit} >Edit chat</MinorButton>}
         </Block>
+
         <p className="text-center font-bold my-4">Members</p>
         <Block className="flex flex-col overflow-y-auto">
-            <OnSurfaceBlock className="flex mb-1">
+            {isOwner && <OnSurfaceBlock className="flex mb-1">
                 <FormTextBox className="flex-1" placeholder="Enter username" value={usernameText} onChange={setUsernameText} />
                 <MinorButton onClick={() => onAddMember(usernameText)}>
                     Invite
                 </MinorButton>
-            </OnSurfaceBlock>
+            </OnSurfaceBlock>}
             {chat.members.map((user, key) => <UserListItem user={user} key={key}></UserListItem>)}
         </Block>
     </div>

@@ -1,3 +1,5 @@
+import { setCurrentUsername } from "../utils/CurrentUser";
+
 export async function register(username: string, displayName: string, password: string, email: string) {
     var result = await fetch("/api/auth/register", {
         method: "POST",
@@ -30,6 +32,8 @@ export async function login(username: string, password: string) {
     });
     if (!result.ok) {
         throw Error(result.statusText);
+    } else {
+        setCurrentUsername(username);
     }
 }
 

@@ -14,6 +14,7 @@ import api from "../../api/ChatsApi";
 import ChatDetailsPage from "./ChatDetailsPage";
 import EditChatPage from "./EditChatPage";
 import useChatMessages from "../hooks/UseChatMessages";
+import { getCurrentUsername } from "../../utils/CurrentUser";
 
 export default function ChatPage() {
     const { id } = useParams();
@@ -30,7 +31,7 @@ export default function ChatPage() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     // TODO: just for development
-    const currentUserId = "2";
+    const currentUsername = getCurrentUsername();
 
     useEffect(() => {
         api.fetchChat(id).then((result) => {
@@ -100,7 +101,7 @@ export default function ChatPage() {
 
         <div className="flex flex-col flex-1 p-2 overflow-y-auto">
             {messages.map((item, key) =>
-                <MessageItem item={item} key={key} isIncoming={currentUserId === item.sender} />)
+                <MessageItem item={item} key={key} isIncoming={currentUsername === item.sender} />)
             }
             <div id="list-bottom-pointer" ref={scrollRef} />
         </div>
@@ -117,10 +118,10 @@ interface MessageItemProps {
     isIncoming: boolean
 }
 function MessageItem({ item, isIncoming }: MessageItemProps) {
-    return <div className={"flex flex-row m" + (isIncoming ? "e-auto" : "s-auto")}>
+    return <div className={"flex flex-row m" + (!isIncoming ? "e-auto" : "s-auto")}>
         <div className="bg-surface p-4 mb-2 rounded border border-surface-outline">
             <div className="font-bold mb-1"> from
-                {isIncoming ? " @" + item.sender + ":" : " You:"}
+                {!isIncoming ? " @" + item.sender + ":" : " You:"}
             </div>
             {item.content}
             <div className="text-minor-text text-end mt-1">at {item.timestamp}</div>

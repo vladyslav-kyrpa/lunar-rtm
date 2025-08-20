@@ -10,12 +10,16 @@ import api from "../../api/ProfilesApi";
 import EditIcon from "../../assets/icons/edit.svg"
 import useNotification from "../hooks/UseNotification";
 import BlockNotification from "../shared/BlockNotification";
+import { getCurrentUsername } from "../../utils/CurrentUser";
 
 export default function ProfilePage() {
     const { username } = useParams();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const isCurrentUser = username === undefined || username === "me";
+
+    const isCurrentUser = (): boolean => {
+        return profile != null && getCurrentUsername() == profile.username;
+    }
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -39,7 +43,7 @@ export default function ProfilePage() {
 
     const handleOnSave = (username: string) => {
         setIsEditMode(false);
-        if (isCurrentUser) {
+        if (isCurrentUser()) {
             navigate("/profile/me");
         } else {
             navigate("/profile/" + username);
@@ -64,11 +68,11 @@ export default function ProfilePage() {
     return <div className="mx-auto p-2 max-w-[500px]">
         <Block className="mt-15 flex-col flex items-center">
             <p className="font-bold text-center mb-5">User Profile</p>
-            <ProfilePicture profile={profile} isCurrent={isCurrentUser} />
-                <p className="text-2xl mt-5 text-center">{profile.displayName}</p>
-                <p className="text-minor-text mb-5">username: {profile.username}</p>
-                <p className="mb-5">{profile.bio}</p>
-                {isCurrentUser && <MinorButton onClick={handleOnEdit}>Edit profile</MinorButton>}
+            <ProfilePicture profile={profile} isCurrent={isCurrentUser()} />
+            <p className="text-2xl mt-5 text-center">{profile.displayName}</p>
+            <p className="text-minor-text mb-5">username: {profile.username}</p>
+            <p className="mb-5">{profile.bio}</p>
+            {isCurrentUser() && <MinorButton onClick={handleOnEdit}>Edit profile</MinorButton>}
         </Block>
     </div>
 }
@@ -108,7 +112,7 @@ function ProfilePicture({ profile, isCurrent }: ProfilePictureProps) {
         return <Block className="w-full">
             <p className="font-bold text-center mb-5">Update profile picture</p>
 
-            {isError && <BlockNotification className="mb-5" text={errorText}/>}
+            {isError && <BlockNotification className="mb-5" text={errorText} />}
 
             <ImageUpload onChange={handleImageUpload} />
 
@@ -120,7 +124,7 @@ function ProfilePicture({ profile, isCurrent }: ProfilePictureProps) {
             <div className="h-full w-full">
                 <img className="w-[250px] h-[250px] rounded-[0.5rem] border-2 border-outline" src={"/api/images/profile-avatar/" + profile.imageId + "?size=3"} alt="profile-avatar" />
             </div>
-            {isCurrent && <IconButton 
+            {isCurrent && <IconButton
                 className="absolute top-0 right-0 m-3"
                 inverted={true}
                 iconSrc={EditIcon}

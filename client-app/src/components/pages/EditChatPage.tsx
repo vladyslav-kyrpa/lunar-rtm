@@ -4,6 +4,7 @@ import api from "../../api/ChatsApi";
 import { Block } from "../shared/Blocks";
 import { FormTextBox } from "../shared/TextBoxes";
 import { MinorButton } from "../shared/Buttons";
+import getCurrentUsername from "../../utils/CurrentUser";
 
 interface EditChatFormData {
     title: string;

@@ -1,4 +1,5 @@
 import type UserProfile from "../data-model/UserProflie";
+import { setCurrentUsername } from "../utils/CurrentUser";
 
 async function fetchProfile(username: string): Promise<UserProfile> {
     const result = await fetch("/api/profiles/" + username);
@@ -12,7 +13,9 @@ async function fetchProfile(username: string): Promise<UserProfile> {
 async function fetchCurrentProfile(): Promise<UserProfile> {
     const result = await fetch("/api/profiles/me");
     if (result.ok) {
-        return (await result.json()) as UserProfile;
+        var profile = (await result.json()) as UserProfile;
+        setCurrentUsername(profile.username);
+        return profile;
     } else {
         throw Error("Failed to get current user profile: " + result.statusText);
     }

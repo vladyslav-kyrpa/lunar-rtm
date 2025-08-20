@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
             request.UserName, request.Password);
 
         if (result.Success)
-            return Ok("Logged-in.");
+            return Ok("Logged-in");
         return Unauthorized(result.Error);
     }
 
