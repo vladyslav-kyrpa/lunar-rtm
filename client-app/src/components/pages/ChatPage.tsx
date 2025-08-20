@@ -13,32 +13,28 @@ import type Chat from "../../data-model/Chat";
 import api from "../../api/ChatsApi";
 import ChatDetailsPage from "./ChatDetailsPage";
 import EditChatPage from "./EditChatPage";
+import useChatMessages from "../hooks/UseChatMessages";
 
 export default function ChatPage() {
+    const { id } = useParams();
+    if (!id) return <NotFoundPage />
+
     const [chat, setChat] = useState<Chat | null>(null);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messages, sendMessage] = useChatMessages(id);
     const [text, setText] = useState("");
 
     const [showDetails, setShowDetails] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
     const navigate = useNavigate();
-    const { id } = useParams();
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     // TODO: just for development
     const currentUserId = "2";
 
-    if (!id) {
-        return <NotFoundPage />;
-    }
-
     useEffect(() => {
         api.fetchChat(id).then((result) => {
             setChat(result);
-            return api.fetchMessages(id);
-        }).then((result) => {
-            setMessages(result);
         }).catch((error) => {
             console.log(error);
         });
@@ -56,13 +52,17 @@ export default function ChatPage() {
     }
 
     const handleOnSend = () => {
-        console.log("Send message...")
+        sendMessage(text, id).then(()=>{
+            setText("");
+        }).catch((error)=>{
+            console.error("Failed to send a message: ", error);
+        });
     }
 
     const handleOnAddMember = (username: string) => {
-        api.inviteUser(id, username).then((result)=>{
+        api.inviteUser(id, username).then((result) => {
             console.log(result);
-        }).catch((error)=>{
+        }).catch((error) => {
             console.error(error);
         });
     }
@@ -114,11 +114,10 @@ export default function ChatPage() {
 
 interface MessageItemProps {
     item: ChatMessage,
-    key: number,
     isIncoming: boolean
 }
-function MessageItem({ item, key, isIncoming }: MessageItemProps) {
-    return <div className={"flex flex-row m" + (isIncoming ? "e-auto" : "s-auto")} key={key}>
+function MessageItem({ item, isIncoming }: MessageItemProps) {
+    return <div className={"flex flex-row m" + (isIncoming ? "e-auto" : "s-auto")}>
         <div className="bg-surface p-4 mb-2 rounded border border-surface-outline">
             <div className="font-bold mb-1"> from
                 {isIncoming ? " @" + item.sender + ":" : " You:"}

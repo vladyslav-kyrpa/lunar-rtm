@@ -8,7 +8,7 @@ import { Block } from "../shared/Blocks";
 import ImageUpload from "../shared/ImageUpload";
 import api from "../../api/ProfilesApi";
 import EditIcon from "../../assets/icons/edit.svg"
-import useNotification from "../hooks/useNotification";
+import useNotification from "../hooks/UseNotification";
 import BlockNotification from "../shared/BlockNotification";
 
 export default function ProfilePage() {

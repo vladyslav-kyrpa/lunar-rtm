@@ -6,6 +6,7 @@ using ServerApp.DataAccess.Repositories.Interfaces;
 using ServerApp.DataAccess.Repositories;
 using ServerApp.BusinessLogic.Services.Interfaces;
 using ServerApp.BusinessLogic.Services;
+using ServerApp.Hubs;
 
 internal class Program
 {
@@ -17,6 +18,7 @@ internal class Program
         builder.Logging.AddConsole();
 
         builder.Services.AddControllers();
+        builder.Services.AddSignalR();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddAuthentication().AddCookie("Identity.Application");
@@ -66,7 +68,11 @@ internal class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseWebSockets();
+
         app.MapControllers();
+        app.MapHub<ChatHub>("/api/chat-hub");
+
         app.Run();
     }
 

@@ -5,7 +5,7 @@ import { ActiveButton, IconButton, MinorButton } from "../shared/Buttons";
 import { FormTextBox } from "../shared/TextBoxes";
 import type UserHeader from "../../data-model/UserHeader";
 import { useNavigate } from "react-router-dom";
-import useNotification from "../hooks/useNotification";
+import useNotification from "../hooks/UseNotification";
 import ImageUpload from "../shared/ImageUpload";
 import BlockNotification from "../shared/BlockNotification";
 
