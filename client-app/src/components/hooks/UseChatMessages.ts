@@ -28,6 +28,7 @@ export default function useChatMessages(chatId:string):UseChatMessagesReturn {
 
         // add handler
         const handleNewMessage = (message:ChatMessage) => {
+            if(message.chatId != chatId) return; // skip if for other chat
             console.log("new message received", message);
             setMessages(prevMessages => [...prevMessages, message]);
         }

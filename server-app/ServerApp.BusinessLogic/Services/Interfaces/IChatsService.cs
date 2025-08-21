@@ -83,4 +83,12 @@ public interface IChatsService
     /// <param name="id">Chat ID</param>
     /// <returns>Chat messages</returns>
     Task<List<Message>> GetMessages(string id);
+
+    /// <summary>
+    /// Store message permanently
+    /// </summary>
+    /// <param name="message">User message</param>
+    /// <param name="chatId">Chat ID</param>
+    /// <returns>Message ID</returns>
+    Task<Result<string>> StoreMessage(string content, string sender, string chatId);
 }

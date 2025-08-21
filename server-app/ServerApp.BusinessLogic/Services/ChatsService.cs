@@ -166,7 +166,7 @@ public class ChatsServices : IChatsService
     {
         if (!await _chats.IsExists(id))
             throw new ArgumentException(nameof(id), "Chat was not found");
-        var messages = _messages.GetByChatId(id);
+        var messages = _messages.GetByChatId(id).ToList();
 
         // Get senders
         var ids = messages.Select(m => m.SenderId).ToList();
@@ -233,6 +233,19 @@ public class ChatsServices : IChatsService
         using var stream = new MemoryStream();
         img.Save(stream, new WebpEncoder { Quality = 90 });
         return stream.ToArray();
+    }
+
+    public async Task<Result<string>> StoreMessage(string content, string sender, string chatId)
+    {
+        var user = await _users.FindByNameAsync(sender);
+        if (user == null)
+            return Result<string>.Fail("Sender was not found");
+        if(!await _chats.IsExists(chatId))
+            return Result<string>.Fail("Chat was not found");
+
+        var id = await _messages.Add(content, user.Id, chatId);
+
+        return Result<string>.Ok(id);
     }
 }
 

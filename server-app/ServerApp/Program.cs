@@ -49,6 +49,7 @@ internal class Program
         builder.Services.AddScoped<IProfilesService, ProfilesService>();
         builder.Services.AddScoped<IChatsService, ChatsServices>();
         builder.Services.AddScoped<IImagesService, ImagesService>();
+        builder.Services.AddSingleton<IPresenceService, PresenceService>();
 
         builder.Services.AddScoped<IAvatarRepository<ProfileImageEntity>, ProfileImageRepository>();
         builder.Services.AddScoped<IAvatarRepository<ChatImageEntity>, ChatImageRepository>();
