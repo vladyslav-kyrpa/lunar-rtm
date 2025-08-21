@@ -1,5 +1,3 @@
-import { setCurrentUsername } from "../utils/CurrentUser";
-
 export async function register(username: string, displayName: string, password: string, email: string) {
     var result = await fetch("/api/auth/register", {
         method: "POST",
@@ -13,9 +11,8 @@ export async function register(username: string, displayName: string, password: 
             email: email
         })
     });
-    if (!result.ok) {
+    if (!result.ok)
         throw Error(result.statusText);
-    }
 }
 
 export async function login(username: string, password: string) {
@@ -30,26 +27,23 @@ export async function login(username: string, password: string) {
             password: password
         })
     });
-    if (!result.ok) {
+    if (!result.ok)
         throw Error(result.statusText);
-    } else {
-        setCurrentUsername(username);
-    }
 }
 
-export async function logout(){
+export async function logout() {
     var result = await fetch("/api/auth/log-out", {
-        credentials: "include", 
+        credentials: "include",
     });
     return result.status == 200;
 }
 
-export async function isAuthenticated():Promise<boolean> {
+export async function isAuthenticated(): Promise<boolean> {
     console.log("Check auth");
     var result = await fetch("/api/auth/check", {
-        credentials: "include", 
+        credentials: "include",
     });
     return result.status == 200;
 }
 
-export default { register, login, isAuthenticated }
+export default { register, login, logout, isAuthenticated }

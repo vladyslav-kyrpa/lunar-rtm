@@ -4,17 +4,18 @@ import GoogleIcon from "../../assets/icons/google.svg";
 import { ActiveButton, TextButton } from "../shared/Buttons";
 import { FormTextBox } from "../shared/TextBoxes";
 import { Block } from "../shared/Blocks";
-import api from "../../api/AuthApi";
+import { useAuth } from "../hooks/AuthContext";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [isError, setIsError] = useState(false);
+    const { logIn } = useAuth();
 
     const handleSubmit = () => {
         if (password !== '' && login !== '') {
-            api.login(login, password).then((r)=>{
+            logIn(login, password).then((_)=>{
                 console.log("Logged-in");
                 navigate("/");
             }).catch((error)=> {

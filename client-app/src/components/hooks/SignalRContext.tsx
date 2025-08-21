@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useAuth } from "./AuthContext";
 
 type SignalRContextType = {
     connection: signalR.HubConnection | null;
@@ -20,8 +21,17 @@ interface SignalRProviderProps {
 }
 export const SignalRProvider = ({children}:SignalRProviderProps) => {
     const [connection, setConnection] = useState<signalR.HubConnection | null>(null); 
+    const { username } = useAuth();
 
     useEffect(()=>{
+        if(!username) {
+            // cleanu up on logout
+            connection?.stop();
+            setConnection(null);
+            return;
+        }
+
+        // new connection
         const builder = new signalR.HubConnectionBuilder()
             .withUrl("/api/chat-hub", {
                 withCredentials: true
@@ -40,7 +50,7 @@ export const SignalRProvider = ({children}:SignalRProviderProps) => {
             builder.stop();
         }
         
-    },[]);
+    },[username]);
 
     return <SignalRContext.Provider value={{connection}}>
         {children}

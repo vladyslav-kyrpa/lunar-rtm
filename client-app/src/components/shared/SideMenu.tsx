@@ -4,6 +4,7 @@ import ChatListIcon from "../../assets/icons/chat-list.svg"
 import SettingsIcon from "../../assets/icons/settings.svg"
 import LogoutIcon from "../../assets/icons/logout.svg"
 import ProfileIcon from "../../assets/icons/profile.svg"
+import { useAuth } from "../hooks/AuthContext"
 
 interface MenuItem {
     title: string,
@@ -13,13 +14,22 @@ interface MenuItem {
 
 export default function SideMenu() {
     const navigate = useNavigate();
+    const { logOut } = useAuth();
+
+    const handleOnLogout = () => {
+        logOut().then(()=>{
+            navigate('/log-in');
+        }).catch((error)=>{
+            console.error("Failed to logout", error);
+        });
+    }
 
     const menuItems: MenuItem[] = [
         { title: "Profile", iconSrc: ProfileIcon, handler: () => { navigate("/profile/me") } },
         { title: "New chat", iconSrc: NewChatIcon, handler: () => { navigate("/create-chat") } },
         { title: "All chats", iconSrc: ChatListIcon, handler: () => { navigate("/chats") } },
         { title: "Settings", iconSrc: SettingsIcon, handler: () => { navigate("/settings") } },
-        { title: "Logout", iconSrc: LogoutIcon, handler: () => { } },
+        { title: "Logout", iconSrc: LogoutIcon, handler: handleOnLogout },
     ]
 
     return <div className="bg-surface h-full flex flex-col p-5">
