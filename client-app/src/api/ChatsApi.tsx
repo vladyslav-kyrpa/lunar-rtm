@@ -31,13 +31,13 @@ async function fetchMessages(id:string): Promise<ChatMessage[]>{
     }
 }
 
-async function createChat(title: string, description: string) {
+async function createChat(title: string, description: string, type:number) {
     const result = await fetch("/api/chats/create", {
         method:"POST",
         headers: {
             "Content-Type":"application/json",
         },
-        body: JSON.stringify({title, description, type:3}) // TODO: add type selection
+        body: JSON.stringify({title, description, type}) // TODO: add type selection
     });
     if(!result.ok){
         throw Error("Failed to create chat: " + result.statusText);

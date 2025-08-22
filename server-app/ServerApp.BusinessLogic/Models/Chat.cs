@@ -4,9 +4,9 @@ public class Chat
 {
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
+    public ChatType Type { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
-    public UserProfileHeader Owner { get; set; }
+    public UserProfileHeader? Owner { get; set; }
     public string ImageId { get; set; } = string.Empty;
     public DateTime CreationTime { get; set; }
     public List<UserProfileHeader> Members { get; set; } = [];

@@ -91,9 +91,11 @@ public class ChatsServices : IChatsService
         {
             Id = chat.Id.ToString(),
             Title = chat.Title,
+            Type = (ChatType)chat.Type,
             Description = chat.Description,
             ImageId = chat.ImageId.ToString() ?? "empty",
-            Owner = UserEntityToHeader(chat.Owner),
+            Owner = UserEntityToHeader(chat.Owner
+                ?? throw new Exception("Owner profile was not found")),
             Members = [.. members.Select(UserEntityToHeader)]
         };
         return Result<Chat>.Ok(model);

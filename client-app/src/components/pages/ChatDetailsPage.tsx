@@ -15,6 +15,7 @@ import AvatarImage from "../shared/AvatarImage";
 import EditIcon from "../../assets/icons/edit.svg";
 import CloseIcon from "../../assets/icons/close.svg";
 import { getCurrentUsername } from "../../utils/CurrentUser";
+import { ChatType } from "../../data-model/Chat";
 
 
 interface ChatDetailsPageProps {
@@ -28,6 +29,14 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
     const [usernameText, setUsernameText] = useState("");
     const isOwner = chat.owner.username == getCurrentUsername();
 
+    const typeToString = (type:ChatType): string => {
+        console.log("Chat type: ", type)
+        if(type == ChatType.MONOLOGUE) return "Monologue";
+        if(type == ChatType.DIALOGUE) return "Dialogue";
+        if(type == ChatType.POLYLOGUE) return "Polylogue";
+        else return "Unknown";
+    }
+
     return <div className="h-screen flex-col p-3 pt-15 w-[500px] mx-auto">
         <Block className="flex flex-col items-center">
             <div className="flex items-end w-full">
@@ -40,6 +49,7 @@ export default function ChatDetailsPage({ chat, onClose, onEdit, onAddMember }: 
             <ChatPicture chat={chat} canEdit={isOwner}/>
             <p className="me-2 mt-5 text-2xl">{chat.title}</p>
             <p className="text-minor-text mb-5">Members: {chat.members.length}</p>
+            <p className="text-minor-text mb-5">type: {typeToString(chat.type)}</p>
             <p className="mb-5">{chat.description}</p>
 
             {isOwner && <MinorButton onClick={onEdit} >Edit chat</MinorButton>}
