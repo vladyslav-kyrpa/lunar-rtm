@@ -31,7 +31,7 @@ public class ChatsController : ControllerBase
         var result = await _chats.Get(id);
 
         return result.Success
-            ? Ok(result.Value) 
+            ? Ok(result.Value)
             : BadRequest(result.Error);
     }
 
@@ -81,8 +81,22 @@ public class ChatsController : ControllerBase
         var result = await _chats.Update(id, chat.Title, chat.Description);
 
         return result.Success
-            ? Ok("Chat was updated") 
+            ? Ok("Chat was updated")
             : BadRequest(result.Error);
+    }
+
+    [HttpPost("{id}/delete")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var user = User?.Identity?.Name;
+        if (!await _chats.CanEdit(user ?? "", id))
+                return BadRequest("You have no permissions");
+
+        var result = await _chats.Detele(id);
+
+        return result.Success
+            ? Ok("Chat removed")
+            : BadRequest($"Failed to remove: {result.Error}");
     }
 
     [HttpPost("{chatId}/add-member")]
@@ -126,6 +140,17 @@ public class ChatsController : ControllerBase
 
         return result.Success
             ? Ok($"member {member.Username} was removed") 
+            : BadRequest(result.Error);
+    }
+
+    [HttpPost("{chatId}/leave")]
+    public async Task<IActionResult> LeaveChat(string chatId)
+    {
+        var user = User?.Identity?.Name ?? "";
+
+        var result = await _chats.RemoveMember(user, chatId);
+
+        return result.Success ? Ok("Removed from the chat") 
             : BadRequest(result.Error);
     }
 

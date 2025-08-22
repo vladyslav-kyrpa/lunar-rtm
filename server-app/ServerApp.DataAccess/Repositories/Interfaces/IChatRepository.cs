@@ -12,4 +12,6 @@ public interface IChatRepository
     Task Update(ChatEntity chat);
     IQueryable<ChatEntity> GetList(string userId);
     Task<bool> IsExists(string id);
+    Task<bool> IsMember(string userId, string id);
+    Task<bool> IsOwner(string userId, string id);
 }

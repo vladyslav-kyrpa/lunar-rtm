@@ -254,6 +254,21 @@ public class ChatsServiceIntTests
     }
 
     [Fact]
+    public async Task RemoveMemberButIsOwnerTest()
+    {
+        // Arrange
+        var chats = await SeedChats();
+        var chat = chats[1];
+        var owner = await _users.FindByIdAsync(chat.OwnerId);
+
+        // Act
+        var result = await _service.RemoveMember(owner?.UserName ?? "", chat.Id.ToString());
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
     public async Task RemoveNonExistingMemberTest()
     {
         // Arrange

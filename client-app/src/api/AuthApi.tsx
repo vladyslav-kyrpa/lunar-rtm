@@ -12,7 +12,7 @@ export async function register(username: string, displayName: string, password: 
         })
     });
     if (!result.ok)
-        throw Error(result.statusText);
+        throw Error(await result.text());
 }
 
 export async function login(username: string, password: string) {
@@ -28,7 +28,7 @@ export async function login(username: string, password: string) {
         })
     });
     if (!result.ok)
-        throw Error(result.statusText);
+        throw Error(await result.text());
 }
 
 export async function logout() {

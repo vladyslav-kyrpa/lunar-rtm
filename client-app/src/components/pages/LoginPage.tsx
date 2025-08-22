@@ -5,12 +5,15 @@ import { ActiveButton, TextButton } from "../shared/Buttons";
 import { FormTextBox } from "../shared/TextBoxes";
 import { Block } from "../shared/Blocks";
 import { useAuth } from "../hooks/AuthContext";
+import useNotification from "../hooks/UseNotification";
+import BlockNotification from "../shared/BlockNotification";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [isError, setIsError] = useState(false);
+    const [errorText, isRised, showError, hideError] = useNotification();
     const { logIn } = useAuth();
 
     const handleSubmit = () => {
@@ -18,8 +21,9 @@ export default function RegisterPage() {
             logIn(login, password).then((_)=>{
                 console.log("Logged-in");
                 navigate("/");
-            }).catch((error)=> {
+            }).catch((error:Error)=> {
                 console.error(error);
+                showError(error.message);
             })
         } else {
             setIsError(true);
@@ -33,6 +37,8 @@ export default function RegisterPage() {
     return <div className="h-screen flex flex-col justify-center items-center">
         <Block className="flex flex-col w-[400px]">
             <p className="text-center font-bold mb-5">Log-in</p>
+
+            {isRised && <BlockNotification text={errorText} className="mb-3"/>}
 
             <label className="mb-3">Login</label>
             <FormTextBox value={login} onChange={setLogin}

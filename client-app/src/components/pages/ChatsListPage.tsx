@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AvatarImage from "../shared/AvatarImage";
+import { StaticAvatarImage } from "../shared/Avatars";
 import { Block } from "../shared/Blocks";
 import api from "../../api/ChatsApi";
 import type ChatHeader from "../../data-model/ChatHeader";
@@ -55,7 +55,7 @@ function ChatListItem({ title, newMessages, iconUrl, id, onSelected }: ChatListI
     return <div onClick={() => onSelected(id)}>
         <Block className="mx-3 mt-3 flex items-center space-x-3 transition 
             ease-in-out duration-150 hover:bg-on-surface">
-            <AvatarImage size="medium" imgUrl={iconUrl} />
+            <StaticAvatarImage size="medium" imgUrl={iconUrl} />
             <p>{title}</p>
             {newMessages > 0 &&
                 <p className="bg-white p-1 rounded text-black">{newMessages}</p>

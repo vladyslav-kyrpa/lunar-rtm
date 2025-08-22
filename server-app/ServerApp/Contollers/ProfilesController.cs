@@ -53,30 +53,40 @@ public class ProfilesController : ControllerBase
         var currentUser = User?.Identity?.Name;
         if (currentUser == null)
             return Unauthorized("Cannot get current user");
-        if (currentUser != username)
-            return BadRequest("You have no rights to delete this profile");
+        if (username != "me")
+        {
+            if (currentUser != username)
+                return BadRequest("You have no rights to update this profile");
+        }
+        else username = currentUser;
 
-        var result = await _profiles.Update(currentUser, profile.Username, profile.DisplayName, profile.Bio);
+        var result = await _profiles.Update(username, profile.Username, profile.DisplayName, profile.Bio);
 
         return result.Success ? Ok("Profile updated")
             : BadRequest(result.Error);
     }
 
-    [HttpGet("{username}/delete")]
+    [HttpPost("{username}/delete")]
     public async Task<IActionResult> DeleteProfile(string username)
     {
         var currentUser = User?.Identity?.Name; 
         if (currentUser == null)
             return Unauthorized("Cannot get current user");
-        if (currentUser != username)
-            return BadRequest("You have no rights to delete this profile");
+        
+        if (username != "me")
+        {
+            if (currentUser != username)
+                return BadRequest("You have no rights to delete this profile");
+        }
+        else username = currentUser;
 
         var result = await _profiles.Delete(username);
+        if (result.IsFailed)
+            BadRequest(result.Error);
+
         await _auth.LogoutUser();
 
-        return result.Success
-            ? Ok("User profile was deleted permanently")
-            : BadRequest(result.Error);
+        return Ok("User profile was deleted permanently");
     }
 
     [HttpPost("{username}/update-image")]

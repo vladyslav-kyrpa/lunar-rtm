@@ -140,9 +140,12 @@ public class ChatsServices : IChatsService
         if (user == null)
             return Result.Fail("User was not found"); 
         if (!await _chats.IsExists(chatId))
-            return Result.Fail("Chat was not found"); 
-        
+            return Result.Fail("Chat was not found");
+        if (await _chats.IsOwner(user.Id, chatId))
+            return Result.Fail("Cannot remove an owner");
+
         await _chats.RemoveMember(chatId, user.Id);
+
         return Result.Ok();
     }
 

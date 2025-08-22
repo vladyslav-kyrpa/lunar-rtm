@@ -4,6 +4,8 @@ import { FormTextBox } from "../shared/TextBoxes";
 import { ActiveButton, TextButton } from "../shared/Buttons";
 import { Block } from "../shared/Blocks";
 import api from "../../api/AuthApi";
+import useNotification from "../hooks/UseNotification";
+import BlockNotification from "../shared/BlockNotification";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -13,14 +15,16 @@ export default function RegisterPage() {
     const [password, setPassword] = useState('');
     const [confirmedPassword, setConfirmedPassword] = useState('');
     const [isError, setIsError] = useState(false);
+    const [errorText, isRised, showError, hideError] = useNotification();
 
     const handleSubmit = () => {
         if (isFormValid()) {
             api.register(username, displayName, password, email).then((result) => {
                 console.log(result);
                 navigate("/log-in");
-            }).catch((error) => {
-                console.error(error);
+            }).catch((error:Error) => {
+                console.error(error.message);
+                showError(error.message);
             });
         } else {
             setIsError(true);
@@ -43,6 +47,8 @@ export default function RegisterPage() {
     return <div className="h-screen flex justify-center items-center">
         <Block className="flex flex-col w-[400px]">
             <p className="text-center font-bold mb-5">Register</p>
+
+            {isRised && <BlockNotification className="mb-3" text={errorText}/> }
 
             <label className="mb-3">Username</label>
             <FormTextBox value={username} onChange={setUsername}

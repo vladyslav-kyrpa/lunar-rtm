@@ -1,25 +1,25 @@
-import { useState } from "react";
-import type Chat from "../../data-model/Chat";
-import api from "../../api/ChatsApi";
-import { Block } from "../shared/Blocks";
-import { FormTextBox } from "../shared/TextBoxes";
-import { MinorButton } from "../shared/Buttons";
-
-interface EditChatFormData {
-    title: string;
-    description: string;
-    image?: File;
-}
+import { useEffect, useState } from "react";
+import { Block } from "../../shared/Blocks";
+import { FormTextBox } from "../../shared/TextBoxes";
+import { MinorButton } from "../../shared/Buttons";
+import { useChatContext } from "./ChatContext";
+import LoadingScreen from "../../shared/LoadingScreen";
 
 interface EditChatPageProps {
-    chat: Chat;
     onClose: () => void;
-    onSubmit: (data: EditChatFormData) => void;
+    onSubmit: () => void;
 }
 
-export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPageProps) {
-    const [newTitle, setNewTitle] = useState(chat.title);
-    const [newDescription, setNewDescription] = useState(chat.description);
+export default function EditChatPage({onClose, onSubmit}: EditChatPageProps) {
+    const { chat, update } = useChatContext();
+    const [newTitle, setNewTitle] = useState(chat?.title ?? "");
+    const [newDescription, setNewDescription] = useState(chat?.description ?? "");
+
+    useEffect(()=>{
+        if(!chat) return;
+        setNewTitle(chat?.title);
+        setNewDescription(chat?.description);
+    },[chat]);
 
     const handleInput = (value: string, param: string) => {
         if (param === "title")
@@ -33,13 +33,11 @@ export default function EditChatPage({ chat, onClose, onSubmit }: EditChatPagePr
             console.error("Form values should be not empty");
             return;
         }
-
-        api.updateChat(chat.id, newTitle, newDescription).then((result) => {
-            console.log(result);
-        }).catch((error) => {
-            console.error(error);
-        });
+        update(newTitle, newDescription)
+            .then((_)=>onSubmit());
     }
+
+    if(!chat) return <LoadingScreen/>
 
     return <div className="flex items-center justify-center h-screen">
         <Block className="w-[400px] mt-15 flex flex-col">

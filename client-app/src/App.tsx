@@ -4,10 +4,10 @@ import LoginPage from "./components/pages/LoginPage"
 import RegisterPage from "./components/pages/RegisterPage"
 import ChatsListPage from "./components/pages/ChatsListPage"
 import MainLayout from "./components/shared/MainLayout"
-import ChatPage from "./components/pages/ChatPage"
-import ProfilePage from "./components/pages/ProfilePage"
+import ChatPage from "./components/pages/Chat/ChatPage"
 import NewChatPage from "./components/pages/NewChatPage"
 import ProtectedRoute from "./components/shared/ProtectedRoute"
+import ProfilePage from "./components/pages/Profile/ProfilePage"
 
 const MainLayoutWrapper = () => (
   <MainLayout>

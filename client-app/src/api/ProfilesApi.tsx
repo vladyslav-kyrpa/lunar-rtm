@@ -39,6 +39,17 @@ async function updateProfile(username: string, newUsername: string, newDisplayNa
     }
 }
 
+async function deleteProfile(username:string) {
+    const result = await fetch("/api/profiles/" + username + "/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+    if (!result.ok)
+        throw Error("Failed to update profile: " + result.statusText);
+}
+
 async function updateImage(username: string, image: File) {
     const formData = new FormData();
     formData.append("image", image);
@@ -54,4 +65,4 @@ async function updateImage(username: string, image: File) {
     }
 }
 
-export default { fetchProfile, fetchCurrentProfile, updateProfile, updateImage }
+export default { fetchProfile, fetchCurrentProfile, updateProfile, deleteProfile, updateImage }

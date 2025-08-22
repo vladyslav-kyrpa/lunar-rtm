@@ -62,6 +62,20 @@ public class ChatRepository : IChatRepository
             .AnyAsync(c => c.Id == guidId);
     }
 
+    public async Task<bool> IsMember(string userId, string id)
+    {
+        var guidId = Guid.Parse(id);
+        return await _context.Chats
+            .AnyAsync(c => c.Id == guidId && c.MemberIDs.Contains(userId));
+    }
+
+    public async Task<bool> IsOwner(string userId, string id)
+    {
+        var guidId = Guid.Parse(id);
+        return await _context.Chats
+            .AnyAsync(c => c.Id == guidId && c.OwnerId == userId);
+    }
+
     public async Task Remove(string id)
     {
         var guidId = Guid.Parse(id);
