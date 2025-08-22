@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { StaticAvatarImage } from "../shared/Avatars";
+import { AvatarSize, ChatImage } from "../shared/Avatars";
 import { Block } from "../shared/Blocks";
 import api from "../../api/ChatsApi";
 import type ChatHeader from "../../data-model/ChatHeader";
@@ -38,7 +38,7 @@ function ChatsList({ items, onSelected }: ChatsListProps) {
     return items.map((item, key) => <ChatListItem key={key}
         title={item.title}
         id={item.id}
-        iconUrl={"/api/images/chat-avatar/" + item.imageId}
+        imageId={item.imageId}
         newMessages={item.newMessagesCount}
         onSelected={onSelected} />
     )
@@ -47,15 +47,15 @@ function ChatsList({ items, onSelected }: ChatsListProps) {
 interface ChatListItemProps {
     title: string,
     newMessages: number,
-    iconUrl: string,
+    imageId: string,
     id: string,
     onSelected: (id: string) => void
 }
-function ChatListItem({ title, newMessages, iconUrl, id, onSelected }: ChatListItemProps) {
+function ChatListItem({ title, newMessages, imageId, id, onSelected }: ChatListItemProps) {
     return <div onClick={() => onSelected(id)}>
         <Block className="mx-3 mt-3 flex items-center space-x-3 transition 
             ease-in-out duration-150 hover:bg-on-surface">
-            <StaticAvatarImage size="medium" imgUrl={iconUrl} />
+            <ChatImage size={AvatarSize.Small} imageId={imageId} />
             <p>{title}</p>
             {newMessages > 0 &&
                 <p className="bg-white p-1 rounded text-black">{newMessages}</p>

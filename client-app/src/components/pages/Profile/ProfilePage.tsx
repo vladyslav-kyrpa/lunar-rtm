@@ -6,7 +6,7 @@ import { Block } from "../../shared/Blocks";
 import EditProfilePage from "./EditProfilePage";
 import { ProfileProvider, useProfileContext } from "./ProfileContext";
 import { useAuth } from "../../hooks/AuthContext";
-import { UpdatableAvatar } from "../../shared/Avatars";
+import { UpdatableAvatar } from "../../shared/UpdatableAvatar";
 import { logout } from "../../../api/AuthApi";
 
 export default function ProfilePage(){
@@ -15,7 +15,6 @@ export default function ProfilePage(){
         <ProfilePageContent/>
     </ProfileProvider>
 }
-
 
 export function ProfilePageContent() {
     const { profile, updateImage } = useProfileContext();

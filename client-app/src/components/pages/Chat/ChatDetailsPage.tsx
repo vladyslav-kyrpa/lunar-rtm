@@ -7,10 +7,11 @@ import { useNavigate } from "react-router-dom";
 
 import CloseIcon from "../../../assets/icons/close.svg";
 import { ChatType } from "../../../data-model/Chat";
-import { UpdatableAvatar, StaticAvatarImage } from "../../shared/Avatars";
+import { AvatarSize, ProfileImage } from "../../shared/Avatars";
 import { useChatContext } from "./ChatContext";
 import { useAuth } from "../../hooks/AuthContext";
 import LoadingScreen from "../../shared/LoadingScreen";
+import { UpdatableAvatar } from "../../shared/UpdatableAvatar";
 
 
 interface ChatDetailsPageProps {
@@ -65,9 +66,9 @@ export default function ChatDetailsPage({ onClose, onEdit }: ChatDetailsPageProp
                     className="ms-auto" />
             </div>
 
-            <UpdatableAvatar imageId={chat.imageId} 
+            <UpdatableAvatar imageId={chat.imageId}
                 type={"chat-avatar"}
-                canEdit={isOwner()} 
+                canEdit={isOwner()}
                 onSave={onImageUpdate} />
             <p className="me-2 mt-5 text-2xl">{chat.title}</p>
             <p className="text-minor-text mb-5">Members: {chat.members.length}</p>
@@ -110,7 +111,7 @@ function UserListItem({ user, onRemove, canRemove }: UserListItemProps) {
     }
     return <div onClick={handleOnClick} className="mb-1">
         <OnSurfaceBlock className="mt-1 flex items-center hover:bg-on-surface-outline">
-            <StaticAvatarImage size="small" imgUrl={"/api/images/profile-avatar/" + user.imageId}/>
+            <ProfileImage size={AvatarSize.Small} imageId={user.imageId} />
             <p className="ms-2 me-auto">{user.displayName} (@{user.username})</p>
             {canRemove && <IconButton iconSrc={CloseIcon} onClick={onRemove} inverted={true} />}
         </OnSurfaceBlock>
