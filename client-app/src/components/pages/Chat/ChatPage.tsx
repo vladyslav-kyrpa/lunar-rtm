@@ -39,6 +39,7 @@ function ChatPageContent() {
     }
 
     const handleOnSend = () => {
+        if(text === "") return;
         sendMessage(text).then(() => setText(""));
     }
 

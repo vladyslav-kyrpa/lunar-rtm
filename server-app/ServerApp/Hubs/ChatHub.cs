@@ -61,6 +61,9 @@ public class ChatHub : Hub
     [HubMethodName("send-message")]
     public async Task SendMessage(IncomingMessage message)
     {
+        if (string.IsNullOrEmpty(message.Content))
+            return;
+
         var sender = Context.User?.Identity?.Name;
         if (sender == null)
         {
