@@ -42,4 +42,11 @@ export function IconButton({iconSrc, onClick, className, inverted}:IconButtonPro
     </div>
 }
 
-export default {ActiveButton, MinorButton, TextButton, IconButton}
+export function IconButtonSm({iconSrc, onClick, className, inverted}:IconButtonProps) {
+    return <div className={"w-fit p-1 rounded border border-transparent hover:bg-on-surface hover:border-on-surface-outline " + className}>
+        <img onClick={onClick} src={iconSrc} height={20} width={20} 
+            className={inverted ? "invert" : ""}/>
+    </div>
+}
+
+export default {ActiveButton, MinorButton, TextButton, IconButton, IconButtonSm}

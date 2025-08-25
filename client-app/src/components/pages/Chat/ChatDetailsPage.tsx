@@ -12,6 +12,8 @@ import { useChatContext } from "./ChatContext";
 import { useAuth } from "../../hooks/AuthContext";
 import LoadingScreen from "../../shared/LoadingScreen";
 import { UpdatableAvatar } from "../../shared/UpdatableAvatar";
+import useNotification from "../../hooks/UseNotification";
+import ConfirmationDialog from "../../shared/ConfimationDialog";
 
 
 interface ChatDetailsPageProps {
@@ -21,14 +23,20 @@ interface ChatDetailsPageProps {
 
 export default function ChatDetailsPage({ onClose, onEdit }: ChatDetailsPageProps) {
     const [usernameText, setUsernameText] = useState("");
+    const [deleteConfText, isConfirmationRised, showConfirmation, hideConfirmation] = useNotification();
     const { chat, delete: deleteChat, addMember, removeMember, leave, updateImage } = useChatContext();
     const { username } = useAuth();
 
     const navigate = useNavigate();
     const isOwner = () => chat?.owner.username == username;
 
+    const onDeleteConfirmed = (isConfirmed:boolean) => {
+        if(isConfirmed)
+            deleteChat().then((_) => navigate("/"));
+        else hideConfirmation();
+    }
     const onDelete = () => {
-        deleteChat().then((_) => navigate("/"));
+        showConfirmation("Do you want to delete this chat?");
     }
 
     const onAddMember = () => {
@@ -96,6 +104,9 @@ export default function ChatDetailsPage({ onClose, onEdit }: ChatDetailsPageProp
                 onRemove={() => onRemoveMember(user.username)} />)
             }
         </Block>
+        <ConfirmationDialog title="Confirmation" 
+            text={deleteConfText} onResponse={onDeleteConfirmed} 
+            show={isConfirmationRised}/>
     </div>
 }
 

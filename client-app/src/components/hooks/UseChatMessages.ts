@@ -6,7 +6,6 @@ import { useSignalR } from "./SignalRContext";
 type UseChatMessagesReturn = [
     ChatMessage[], // messages
     (text:string, chatId:string) => Promise<void>, // send message
-    (messageId:string) => Promise<void> // delete message
 ]
 export default function useChatMessages(chatId:string):UseChatMessagesReturn {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -26,12 +25,13 @@ export default function useChatMessages(chatId:string):UseChatMessagesReturn {
             return;
         }
 
-        // add handler
+        // add handlers
         const handleNewMessage = (message:ChatMessage) => {
             if(message.chatId != chatId) return; // skip if for other chat
             console.log("new message received", message);
             setMessages(prevMessages => [...prevMessages, message]);
         }
+
         connection.on("receive-message", handleNewMessage);
 
         // remove handler on unmount
@@ -48,9 +48,5 @@ export default function useChatMessages(chatId:string):UseChatMessagesReturn {
             connection.send("send-message", { content, chatId });
     }, [connection]);
 
-    const deleteMessage = async (messageId:string): Promise<void> => {
-        console.log("not implemented");
-    }
-
-    return [ messages, sendMessage, deleteMessage ]; 
+    return [ messages, sendMessage ]; 
 }

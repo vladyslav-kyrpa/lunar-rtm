@@ -15,6 +15,10 @@ public class UserProfileInputValidator
         var allowedChars = "abcdefghijklmnopqrstuvwxyz1234567890.-_";
         foreach (var c in value)
             if (!allowedChars.Contains(c)) return false;
+
+        if (GetBlackList().Contains(value))
+            return false;
+
         return true;
     }
 
@@ -24,4 +28,8 @@ public class UserProfileInputValidator
             throw new ArgumentNullException(nameof(value), "Email is null or empty");
         return Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
+
+    private static HashSet<string> GetBlackList() => [
+        "deleted-user"
+    ];
 }

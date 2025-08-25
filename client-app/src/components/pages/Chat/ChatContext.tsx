@@ -37,7 +37,7 @@ export function useChatContext () {
 
 export function useChat(id:string):UseChatReturn {
     const [chat, setChat] = useState<Chat|null>(null);
-    const [messages, sendMessage] = useChatMessages(id);
+    const [ messages, sendMessage ] = useChatMessages(id);
         
     useEffect(()=>{
         api.fetchChat(id)

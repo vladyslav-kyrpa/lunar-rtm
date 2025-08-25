@@ -56,7 +56,7 @@ function ChatPageContent() {
         </div>
 
         <div className="flex flex-col flex-1 p-2 overflow-y-auto">
-            {messages.map((item, key) => <MessageItem item={item} key={key}
+            {messages.map((item, key) => <MessageItem item={item} key={key} 
                 isIncoming={currentUsername === item.sender} />)}
             <div id="list-bottom-pointer" ref={scrollRef} />
         </div>
@@ -72,11 +72,11 @@ function ChatPageContent() {
 
 interface MessageItemProps {
     item: ChatMessage,
-    isIncoming: boolean
+    isIncoming: boolean,
 }
 function MessageItem({ item, isIncoming }: MessageItemProps) {
     return <div className={"flex flex-row m" + (!isIncoming ? "e-auto" : "s-auto")}>
-        <div className="bg-surface p-4 mb-2 rounded border border-surface-outline">
+        <div className="bg-surface p-4 mb-2 rounded border border-surface-outline min-w-[200px]">
             <div className="font-bold mb-1"> from
                 {!isIncoming ? " @" + item.sender + ":" : " You:"}
             </div>

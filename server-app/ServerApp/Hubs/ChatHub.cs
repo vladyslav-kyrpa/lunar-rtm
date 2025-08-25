@@ -20,6 +20,7 @@ public class ChatHub : Hub
     }
 
     public record IncomingMessage(string Content, string ChatId);
+    public record MessageToDelete(string Id, string ChatId);
 
     public override Task OnConnectedAsync()
     {
@@ -60,7 +61,6 @@ public class ChatHub : Hub
     [HubMethodName("send-message")]
     public async Task SendMessage(IncomingMessage message)
     {
-        // store message
         var sender = Context.User?.Identity?.Name;
         if (sender == null)
         {
