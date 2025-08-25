@@ -6,6 +6,6 @@ public class Message
     public string Sender { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string ChatId { get; set; } = string.Empty;
-    public DateTime CreationTime { get; set; } = DateTime.MinValue;
+    public DateTime Timestamp { get; set; } = DateTime.MinValue;
 
 }

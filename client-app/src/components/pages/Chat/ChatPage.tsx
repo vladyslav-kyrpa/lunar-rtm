@@ -75,13 +75,21 @@ interface MessageItemProps {
     isIncoming: boolean,
 }
 function MessageItem({ item, isIncoming }: MessageItemProps) {
+    const date = new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(new Date(item.timestamp));
+
     return <div className={"flex flex-row m" + (!isIncoming ? "e-auto" : "s-auto")}>
         <div className="bg-surface p-4 mb-2 rounded border border-surface-outline min-w-[200px]">
             <div className="font-bold mb-1"> from
                 {!isIncoming ? " @" + item.sender + ":" : " You:"}
             </div>
             {item.content}
-            <div className="text-minor-text text-end mt-1">at {item.timestamp}</div>
+            <div className="text-minor-text text-end mt-1">at {date}</div>
         </div>
     </div>
 }

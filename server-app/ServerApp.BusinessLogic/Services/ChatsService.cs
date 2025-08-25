@@ -189,7 +189,7 @@ public class ChatsServices : IChatsService
             {
                 Id = m.Id.ToString(),
                 Content = m.Content,
-                CreationTime = m.CreationDate,
+                Timestamp = m.CreationDate,
                 Sender = m.SenderId == null
                     ? "deleted-user"
                     : senders[m.SenderId].UserName ?? throw new Exception("User with no username"),

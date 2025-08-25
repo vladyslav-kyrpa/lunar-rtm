@@ -83,7 +83,7 @@ public class ChatHub : Hub
             Id = result.Value,
             ChatId = message.ChatId,
             Content = message.Content,
-            CreationTime = DateTime.UtcNow,
+            Timestamp = DateTime.UtcNow,
             Sender = sender
         });
     }
