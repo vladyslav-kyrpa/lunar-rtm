@@ -21,21 +21,30 @@ public class ChatRepository : IChatRepository
             Id = id,
             Title = title,
             Description = description,
-            OwnerId = ownerId,
             Type = type,
             CreationDate = DateTime.UtcNow
+        });
+        _context.ChatMembers.Add(new ChatMemberEntity
+        {
+            ChatId = id,
+            UserId = ownerId,
+            Role = ChatMemberRole.Owner
         });
         await _context.SaveChangesAsync();
         return id.ToString();
     }
 
-    public async Task AddMember(string id, string memberId)
+    public async Task AddMember(string chatId, string memberId, ChatMemberRole role)
     {
-        var guidId = Guid.Parse(id);
-        var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == guidId);
-        if (chat == null)
-            throw new ArgumentException("Chat was not found", nameof(id));
-        chat.MemberIDs.Add(memberId);
+        var guidId = Guid.Parse(chatId);
+
+        _context.ChatMembers.Add(new ChatMemberEntity
+        {
+            ChatId = guidId,
+            UserId = memberId,
+            Role = role
+        });
+
         await _context.SaveChangesAsync();
     }
 
@@ -43,7 +52,8 @@ public class ChatRepository : IChatRepository
     {
         var guidId = Guid.Parse(id);
         return await _context.Chats
-            .Include(x => x.Owner)
+            .Include(x => x.Members)
+            .ThenInclude(x=>x.User)
             .FirstOrDefaultAsync(c => c.Id == guidId);
     }
 
@@ -51,7 +61,7 @@ public class ChatRepository : IChatRepository
     {
         return _context.Chats
             .AsNoTracking()
-            .Where(c => c.MemberIDs.Contains(userId));
+            .Where(c => c.Members.Any(x => x.UserId == userId));
     }
 
     public async Task<bool> IsExists(string id)
@@ -62,19 +72,19 @@ public class ChatRepository : IChatRepository
             .AnyAsync(c => c.Id == guidId);
     }
 
-    public async Task<bool> IsMember(string userId, string id)
+    public async Task<ChatMemberEntity?> GetMember(string userId, string chatId)
     {
-        var guidId = Guid.Parse(id);
-        return await _context.Chats
-            .AnyAsync(c => c.Id == guidId && c.MemberIDs.Contains(userId));
+        var guidId = Guid.Parse(chatId);
+        var member = await _context.ChatMembers
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == guidId);
+        return member;
     }
 
-    public async Task<bool> IsOwner(string userId, string id)
+    public async Task UpdateMember(ChatMemberEntity member)
     {
-        var guidId = Guid.Parse(id);
-        return await _context.Chats
-            .AnyAsync(c => c.Id == guidId && c.OwnerId == userId);
-    }
+        _context.Update(member);
+        await _context.SaveChangesAsync();
+    } 
 
     public async Task Remove(string id)
     {
@@ -90,11 +100,13 @@ public class ChatRepository : IChatRepository
     public async Task RemoveMember(string id, string memberId)
     {
         var guidId = Guid.Parse(id);
-        var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == guidId);
-        if (chat == null)
-            throw new ArgumentException("Chat was not found", nameof(id));
+        var member = await _context.ChatMembers
+            .FirstOrDefaultAsync(x => x.UserId == memberId && x.ChatId == guidId);
+        if(member == null)
+            throw new ArgumentException("User is not a member", nameof(memberId));
 
-        chat.MemberIDs.Remove(memberId);
+        _context.ChatMembers.Remove(member);
+
         await _context.SaveChangesAsync();
     }
 
@@ -108,6 +120,5 @@ public class ChatRepository : IChatRepository
     }
 
     private bool IsChatValid(ChatEntity chat)
-        => chat != null && chat.Id != Guid.Empty
-            && chat.OwnerId != string.Empty;
+        => chat != null && chat.Id != Guid.Empty;
 }

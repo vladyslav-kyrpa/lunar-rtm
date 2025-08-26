@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServerApp.BusinessLogic.Common;
 using ServerApp.BusinessLogic.Models;
 using ServerApp.BusinessLogic.Services.Interfaces;
+using ServerApp.DataAccess.Entities;
 using ServerApp.DataAccess.Repositories.Interfaces;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
@@ -32,24 +34,16 @@ public class ChatsServices : IChatsService
         var user = await _users.FindByNameAsync(username);
         if (user == null)
             return Result.Fail("User was not found");
-        if (!await _chats.IsExists(chatId))
-            return Result.Fail("Chat was not found");
-
-        await _chats.AddMember(chatId, user.Id);
-        return Result.Ok();
-    }
-
-    public async Task<bool> CanEdit(string username, string chatId)
-    {
-        var user = await _users.FindByNameAsync(username);
-        if (user == null)
-            return false;
 
         var chat = await _chats.Get(chatId);
-        if (chat == null)
-            return false; 
+        if(chat == null)
+            return Result.Fail("Chat was not found");
 
-        return chat.OwnerId == user.Id;
+        if(chat.Type == (int)ChatType.Dialogue && chat.Members.Count >= 2)
+            return Result.Fail("Dialogue can have only two members");
+
+        await _chats.AddMember(chatId, user.Id, ChatMemberRole.Regular);
+        return Result.Ok();
     }
 
     public async Task<Result<string>> Create(string title, string description, string ownerUsername, ChatType type)
@@ -64,7 +58,6 @@ public class ChatsServices : IChatsService
             return Result<string>.Fail("Owner is not found");
 
         var id = await _chats.Add(title, description, owner.Id, (int)type);
-        await _chats.AddMember(id, owner.Id);
 
         return Result<string>.Ok(id);
     }
@@ -83,9 +76,9 @@ public class ChatsServices : IChatsService
         var chat = await _chats.Get(id);
         if(chat == null)
             return Result<Chat>.Fail("Chat was not found");
-
-        // Member may not exist anymore, so we need a plug
-        var members = await GetMultipleProfiles(chat.MemberIDs);
+        
+        var members = chat.Members.Select(m=>UserEntityToHeader(m.User ?? 
+            throw new Exception("Member user is null")));
 
         var model = new Chat
         {
@@ -94,18 +87,9 @@ public class ChatsServices : IChatsService
             Type = (ChatType)chat.Type,
             Description = chat.Description,
             ImageId = chat.ImageId.ToString() ?? "empty",
-            Owner = UserEntityToHeader(chat.Owner
-                ?? throw new Exception("Owner profile was not found")),
-            Members = [.. members.Select(UserEntityToHeader)]
+            Members = members.ToList()
         };
         return Result<Chat>.Ok(model);
-    }
-
-    private async Task<List<UserProfileEntity>> GetMultipleProfiles(List<string> ids)
-    {
-        return await _users.Users
-            .Where(u => ids.Contains(u.Id))
-            .ToListAsync();
     }
 
     private UserProfileHeader UserEntityToHeader(UserProfileEntity user)
@@ -139,10 +123,13 @@ public class ChatsServices : IChatsService
         var user = await _users.FindByNameAsync(username);
         if (user == null)
             return Result.Fail("User was not found"); 
+
         if (!await _chats.IsExists(chatId))
             return Result.Fail("Chat was not found");
-        if (await _chats.IsOwner(user.Id, chatId))
-            return Result.Fail("Cannot remove an owner");
+
+        var member = await _chats.GetMember(user.Id, chatId);
+        if (member?.Role == ChatMemberRole.Owner)
+            return Result.Fail("Owner cannot be removed");
 
         await _chats.RemoveMember(chatId, user.Id);
 
@@ -251,6 +238,50 @@ public class ChatsServices : IChatsService
         var id = await _messages.Add(content, user.Id, chatId);
 
         return Result<string>.Ok(id);
+    }
+
+    public async Task<Result<ChatMemberPermissions>> GetMemberPermissions(string chatId, string username)
+    {
+        if (!await _chats.IsExists(chatId))
+            return Result<ChatMemberPermissions>.Fail("Chat was not found");
+
+        var user = await _users.FindByNameAsync(username);
+        if (user == null)
+            return Result<ChatMemberPermissions>.Fail("User was not found");
+
+        var member = await _chats.GetMember(user.Id, chatId);
+        if (member == null)
+            return Result<ChatMemberPermissions>.Fail("User is not a member");
+
+        var permissions = new ChatMemberPermissions(member?.Role ?? 
+            throw new Exception("Member role is null"));
+
+        return Result<ChatMemberPermissions>.Ok(permissions);
+    }
+
+    public async Task<Result> ChangeMemberRole(string username, string chatId, string role)
+    {
+        var user = await _users.FindByNameAsync(username);
+        if (user == null)
+            return Result.Fail("User was not found");
+
+        var member = await _chats.GetMember(user.Id, chatId);
+        if (member == null)
+            return Result.Fail("User is not a member");
+
+        if(member.Role == ChatMemberRole.Owner)
+            return Result.Fail("Cannot change an owner");
+
+        switch (role)
+        {
+            case "regular": member.Role = ChatMemberRole.Regular; break;
+            case "moderator": member.Role = ChatMemberRole.Moderator; break;
+            default: return Result.Fail("Unsupported role");
+        }
+
+        await _chats.UpdateMember(member);
+
+        return Result.Ok(); 
     }
 }
 

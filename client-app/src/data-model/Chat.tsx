@@ -14,6 +14,13 @@ export default interface Chat {
     type: ChatType,
     description: string,
     imageId:string,
-    owner:UserHeader,
     members:UserHeader[]
+    currentPermissions:{
+        canEdit:boolean,
+        canDelete:boolean,
+        canAddMember:boolean,
+        canPromote:boolean,
+        canRemoveMember:boolean,
+        canSendMessages:boolean
+    }
 }

@@ -54,20 +54,21 @@ public interface IChatsService
     Task<List<ChatHeader>> GetForUser(string username);
 
     /// <summary>
-    /// Check if user can edit given chat.
-    /// </summary>
-    /// <param name="username">Username</param>
-    /// <param name="chatId">Chat ID</param>
-    /// <returns>True - if can edit, otherwise - false</returns>
-    Task<bool> CanEdit(string username, string chatId);
-
-    /// <summary>
     /// Add member to a chat.
     /// </summary>
     /// <param name="username">Member username</param>
     /// <param name="chatId">Chat ID</param>
     /// <returns>Operation result</returns>
     Task<Result> AddMember(string username, string chatId);
+
+    /// <summary>
+    /// Change member role.
+    /// </summary>
+    /// <param name="username">Member username</param>
+    /// <param name="chatId">Chat ID</param>
+    /// <param name="role">New role</param>
+    /// <returns>Operation result</returns>
+    Task<Result> ChangeMemberRole(string username, string chatId, string role);
 
     /// <summary>
     /// Remove member from a chat.
@@ -92,4 +93,12 @@ public interface IChatsService
     /// <param name="chatId">Chat ID</param>
     /// <returns>Message ID</returns>
     Task<Result<string>> StoreMessage(string content, string sender, string chatId);
+
+    /// <summary>
+    /// Get chat member permissions 
+    /// </summary>
+    /// <param name="chatId">Chat ID</param>
+    /// <param name="username">Member's username</param>
+    /// <returns>Permissions</returns>
+    Task<Result<ChatMemberPermissions>> GetMemberPermissions(string chatId, string username);
 }

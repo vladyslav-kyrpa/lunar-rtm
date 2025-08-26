@@ -39,7 +39,7 @@ function ChatPageContent() {
     }
 
     const handleOnSend = () => {
-        if(text === "") return;
+        if (text === "") return;
         sendMessage(text).then(() => setText(""));
     }
 
@@ -57,15 +57,16 @@ function ChatPageContent() {
         </div>
 
         <div className="flex flex-col flex-1 p-2 overflow-y-auto">
-            {messages.map((item, key) => <MessageItem item={item} key={key} 
+            {messages.map((item, key) => <MessageItem item={item} key={key}
                 isIncoming={currentUsername === item.sender} />)}
             <div id="list-bottom-pointer" ref={scrollRef} />
         </div>
 
-        <div className="flex flex-row m-2 p-2 rounded border bg-surface border-surface-outline">
-            <HiddenTextBox className="w-full" placeholder="Type message..." onChange={(value) => setText(value)} value={text} />
-            <IconButton inverted={true} iconSrc={SendIcon} onClick={handleOnSend}></IconButton>
-        </div>
+        {chat.currentPermissions.canSendMessages &&
+            <div className="flex flex-row m-2 p-2 rounded border bg-surface border-surface-outline">
+                <HiddenTextBox className="w-full" placeholder="Type message..." onChange={(value) => setText(value)} value={text} />
+                <IconButton inverted={true} iconSrc={SendIcon} onClick={handleOnSend}></IconButton>
+            </div>}
     </div>
 }
 

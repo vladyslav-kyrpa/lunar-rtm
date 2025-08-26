@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServerApp.BusinessLogic.Models;
@@ -21,18 +22,33 @@ public class ChatsController : ControllerBase
 
     public record NewChat(string Title, string Description, int Type);
     public record ChatMember(string Username);
+    public record MemberPromotion(string Username, string Role);
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(string id)
     {
+        var user = User?.Identity?.Name;
+        if (user == null)
+            return BadRequest("No current username");
+
         if (string.IsNullOrEmpty(id))
             return NotFound();
 
-        var result = await _chats.Get(id);
+        var chat = await _chats.Get(id);
+        if(chat.IsFailed)
+            return BadRequest(chat.Error);
 
-        return result.Success
-            ? Ok(result.Value)
-            : BadRequest(result.Error);
+        var permissions = await _chats.GetMemberPermissions(id, user);
+        if(permissions.IsFailed) 
+            return BadRequest(permissions.Error);
+
+        // Check on monologue
+        if (chat.Value.Type == ChatType.Monologue && !permissions.Value.CanEdit)
+            permissions.Value.CanSendMessages = false;
+
+        chat.Value.CurrentPermissions = permissions.Value;
+
+        return Ok(chat.Value);
     }
 
     [HttpGet("")]
@@ -75,7 +91,11 @@ public class ChatsController : ControllerBase
         if (user == null)
             return BadRequest("No current username");
 
-        if (!await _chats.CanEdit(user, id))
+        var permissions = await _chats.GetMemberPermissions(id, user);
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if (!permissions.Value.CanEdit)
             return Unauthorized("You have no rights to update this conversation");
 
         var result = await _chats.Update(id, chat.Title, chat.Description);
@@ -89,8 +109,12 @@ public class ChatsController : ControllerBase
     public async Task<IActionResult> Delete(string id)
     {
         var user = User?.Identity?.Name;
-        if (!await _chats.CanEdit(user ?? "", id))
-                return BadRequest("You have no permissions");
+        var permissions = await _chats.GetMemberPermissions(id, user ?? "");
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if (!permissions.Value.CanDelete)
+            return BadRequest("You have no permissions");
 
         var result = await _chats.Detele(id);
 
@@ -111,13 +135,41 @@ public class ChatsController : ControllerBase
         if (user == null)
             return BadRequest("No current username");
 
-        if (!await _chats.CanEdit(user, chatId))
+        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if (!permissions.Value.CanAddMember)
             return Unauthorized("You have no rights to add members");
 
         var result = await _chats.AddMember(member.Username, chatId);
 
         return result.Success
             ? Ok($"member {member.Username} was added") 
+            : BadRequest(result.Error);
+    }
+
+    [HttpPost("{chatId}/promote-member")]
+    public async Task<IActionResult> PromoteMember(string chatId, MemberPromotion promotion)
+    {
+        if (string.IsNullOrEmpty(chatId))
+            return BadRequest("No id provided");
+
+        var user = User?.Identity?.Name;
+        if (user == null)
+            return BadRequest("No current username");
+
+        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if (!permissions.Value.CanPromote)
+            return Unauthorized("You have no rights to change member's role");
+
+        var result = await _chats.ChangeMemberRole(promotion.Username, chatId, promotion.Role);
+
+        return result.Success
+            ? Ok($"member {promotion.Username} was promoted to {promotion.Role}") 
             : BadRequest(result.Error);
     }
 
@@ -133,8 +185,12 @@ public class ChatsController : ControllerBase
         if (user == null)
             return BadRequest("No current username");
 
-        if (!await _chats.CanEdit(user, chatId))
-            return Unauthorized("You have no rights to add members");
+        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if (!permissions.Value.CanRemoveMember)
+            return Unauthorized("You have no rights to remove members");
 
         var result = await _chats.RemoveMember(member.Username, chatId);
 
@@ -164,19 +220,30 @@ public class ChatsController : ControllerBase
         return Ok(messages);
     }
 
-    [HttpPost("{id}/update-image")]
-    public async Task<IActionResult> UpdateImage(IFormFile image, string id)
+    [HttpPost("{chatId}/update-image")]
+    public async Task<IActionResult> UpdateImage(IFormFile image, string chatId)
     {
-        if (string.IsNullOrEmpty(id))
-            return BadRequest("No chat ID provided");
         if (!IsImageValid(image))
             return BadRequest("Image is not valid (max size - 2MB, allowed types: jpeg, png)");
+        if (string.IsNullOrEmpty(chatId))
+            return BadRequest("No chat ID provided");
+
+        var user = User?.Identity?.Name;
+        if (user == null)
+            return BadRequest("No current username");
+
+        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        if(permissions.IsFailed)
+            return BadRequest(permissions.Error);
+
+        if(!permissions.Value.CanEdit)
+            return Unauthorized("You have no rights to change this chat image");
 
         using var stream = new MemoryStream();
         await image.CopyToAsync(stream);
         var bytes = stream.ToArray();
 
-        var result = await _chats.UpdateImage(id, bytes);
+        var result = await _chats.UpdateImage(chatId, bytes);
 
         return result.Success
             ? Ok("Image updated") 

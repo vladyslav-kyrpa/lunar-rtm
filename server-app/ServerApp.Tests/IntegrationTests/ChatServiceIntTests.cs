@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NuGet.Frameworks;
 using ServerApp.BusinessLogic.Models;
 using ServerApp.BusinessLogic.Services;
 using ServerApp.DataAccess;
@@ -72,18 +73,28 @@ public class ChatsServiceIntTests
         var users = await SeedUsers();
         var chats = new List<ChatEntity>
         {
-            new ChatEntity() { Id = Guid.NewGuid(), Title = "Chat1", Description = "1", Owner = users[0], OwnerId = users[0].Id,
-                MemberIDs = { users[0].Id, users[1].Id }, Type = 1, CreationDate = DateTime.UtcNow
+            new ChatEntity() { Id = Guid.NewGuid(), Title = "Chat1", Description = "1",
+                Type = 1, CreationDate = DateTime.UtcNow
             },
-            new ChatEntity() { Id = Guid.NewGuid(), Title = "Chat2", Description = "1", Owner = users[0],  OwnerId = users[0].Id,
-                MemberIDs = { users[0].Id, users[2].Id }, Type = 1, CreationDate = DateTime.UtcNow
+            new ChatEntity() { Id = Guid.NewGuid(), Title = "Chat2", Description = "1",
+                Type = 1, CreationDate = DateTime.UtcNow
             }
         };
-
         _context.AddRange(chats);
-        await _context.SaveChangesAsync();
 
-        return _context.Chats.AsNoTracking().ToList();
+        var members = new List<ChatMemberEntity>
+        {
+            new () { ChatId = chats[0].Id, Chat = chats[0],
+                User=users[0], UserId=users[0].Id, Role = ChatMemberRole.Owner },
+            new () { ChatId = chats[1].Id, Chat = chats[1],
+                User=users[1], UserId=users[1].Id, Role = ChatMemberRole.Owner },
+            new () { ChatId = chats[1].Id, Chat = chats[1],
+                User=users[2], UserId=users[2].Id, Role = ChatMemberRole.Regular }
+        };
+        _context.AddRange(members);
+
+        await _context.SaveChangesAsync();
+        return _context.Chats.AsNoTracking().Include(c => c.Members).ToList();
     }
 
     [Fact]
@@ -104,14 +115,15 @@ public class ChatsServiceIntTests
 
         var id = Guid.Parse(result.Value);
         var chat = await _context.Chats
-            .Include(c => c.Owner)
+            .Include(c => c.Members)
             .FirstAsync(c => c.Id == id);
+        var ownerMember = chat.Members
+            .FirstOrDefault(c => c.UserId == owner.Id && c.Role == ChatMemberRole.Owner);
 
         Assert.Equal(title, chat.Title);
         Assert.Equal(description, chat.Description);
-        Assert.Equal(owner.Id, chat.Owner.Id);
+        Assert.Equal(owner.Id, ownerMember?.UserId);
         Assert.Equal((int)type, chat.Type);
-        Assert.Contains(owner.Id, chat.MemberIDs);
     }
 
     [Fact]
@@ -189,7 +201,7 @@ public class ChatsServiceIntTests
     {
         // Arrange
         var chats = await SeedChats();
-        var chat = chats[1].Id.ToString();
+        var chat = chats[0].Id.ToString();
         var user = "user3";
 
         // Act
@@ -201,7 +213,7 @@ public class ChatsServiceIntTests
             .SingleAsync(c => c.Id == Guid.Parse(chat));
         var userEntity = await _users.FindByNameAsync(user);
         Assert.NotNull(userEntity);
-        Assert.Contains(userEntity.Id, updatedChat.MemberIDs);
+        Assert.Contains(userEntity.Id, updatedChat.Members.Select(m => m.UserId));
     }
 
     [Fact]
@@ -209,7 +221,7 @@ public class ChatsServiceIntTests
     {
         // Arrange
         var chats = await SeedChats();
-        var chat = chats[1].Id.ToString();
+        var chat = chats[0].Id.ToString();
         var user = "random";
 
         // Act
@@ -250,7 +262,7 @@ public class ChatsServiceIntTests
             .SingleAsync(c => c.Id == Guid.Parse(chat));
         var userEntity = await _users.FindByNameAsync(user);
         Assert.NotNull(userEntity);
-        Assert.DoesNotContain(userEntity.Id, updatedChat.MemberIDs);
+        Assert.DoesNotContain(userEntity.Id, updatedChat.Members.Select(m => m.UserId));
     }
 
     [Fact]
@@ -258,8 +270,9 @@ public class ChatsServiceIntTests
     {
         // Arrange
         var chats = await SeedChats();
-        var chat = chats[1];
-        var owner = await _users.FindByIdAsync(chat.OwnerId);
+        var chat = chats[0];
+        var ownerId = chat.Members.FirstOrDefault(x => x.Role == ChatMemberRole.Owner);
+        var owner = await _users.FindByIdAsync(ownerId.UserId);
 
         // Act
         var result = await _service.RemoveMember(owner?.UserName ?? "", chat.Id.ToString());
@@ -318,12 +331,43 @@ public class ChatsServiceIntTests
     public async Task RemoveNonExistingChatTest()
     {
         // Arrange
-        var id = Guid.NewGuid(); 
+        var id = Guid.NewGuid();
 
         // Act
         var result = await _service.Detele(id.ToString());
 
         // Arrange
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
+    public async Task PromoteMemberTest()
+    {
+        // Arrange
+        var chats = await SeedChats();
+
+        // Act
+        var result = await _service
+            .ChangeMemberRole("user3", chats[1].Id.ToString(), "moderator");
+
+        // Assert
+        Assert.True(result.Success); 
+        var user = await _users.FindByNameAsync("user3");
+        var member = await _context.ChatMembers.AsNoTracking()
+            .FirstOrDefaultAsync(c => c.UserId == user.Id && c.ChatId == chats[1].Id);
+        Assert.Equal(ChatMemberRole.Moderator, member?.Role);
+    }
+
+    [Fact]
+    public async Task ChangeOwnerRoleTest()
+    {
+        // Arrange
+        var chats = await SeedChats();
+
+        // Act
+        var result = await _service.ChangeMemberRole("user2", chats[1].Id.ToString(), "moderator");
+
+        // Assert
         Assert.True(result.IsFailed);
     }
 }

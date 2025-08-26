@@ -10,7 +10,7 @@ public class MainDbContext : IdentityDbContext<UserProfileEntity>
     public DbSet<ChatImageEntity> ChatImages { get; set; }
     public DbSet<ChatEntity> Chats { get; set; }
     public DbSet<MessageEntity> Messages { get; set; }
-
+    public DbSet<ChatMemberEntity> ChatMembers { get; set; }
 
     public MainDbContext(DbContextOptions<MainDbContext> options) :
         base(options)
@@ -40,10 +40,23 @@ public class MainDbContext : IdentityDbContext<UserProfileEntity>
         builder.Entity<ChatEntity>()
             .HasKey(x => x.Id);
         builder.Entity<ChatEntity>()
-            .HasOne(x => x.Image) // Chat has one img
-            .WithOne(x=>x.Chat) // Image belongs to one chat
+            .HasOne(x => x.Image) 
+            .WithOne(x=>x.Chat) 
             .HasForeignKey<ChatImageEntity>(x => x.ChatId)
-            .OnDelete(DeleteBehavior.Cascade); // delete image when chat it deleted
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ChatMemberEntity>()
+            .HasKey(x => new { x.ChatId, x.UserId });
+        builder.Entity<ChatMemberEntity>()
+            .HasOne(x => x.Chat)
+            .WithMany(x => x.Members)
+            .HasForeignKey(x => x.ChatId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<ChatMemberEntity>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<MessageEntity>()
             .HasKey(x => x.Id);

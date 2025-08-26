@@ -9,7 +9,5 @@ public class ChatEntity
     public Guid? ImageId { get; set; }
     public ChatImageEntity? Image { get; set; }
     public DateTime CreationDate { get; set; } = DateTime.MinValue;
-    public string OwnerId { get; set; } = string.Empty;
-    public UserProfileEntity? Owner { get; set; }
-    public List<string> MemberIDs { get; set; } = [];
+    public List<ChatMemberEntity> Members { get; set; } = [];
 }
