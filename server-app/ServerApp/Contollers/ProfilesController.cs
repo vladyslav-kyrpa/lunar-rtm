@@ -29,92 +29,137 @@ public class ProfilesController : ControllerBase
     [HttpGet("{username}")]
     public async Task<IActionResult> GetProfile(string username)
     {
+        var currentUser = User?.Identity?.Name
+            ?? throw new Exception("No username for an authorized user"); 
+
         Result<UserProfile> result;
-
         if (username == string.Empty || username == "me")
-        {
-            var currentUser = User?.Identity?.Name;
-            if (currentUser == null)
-                return Unauthorized("User is not authenticated");
             result = await _profiles.GetByUsername(currentUser);
-        }
         else
-        {
             result = await _profiles.GetByUsername(username);
+
+        if (result.IsFailed)
+        {
+            _logger.LogError("Failed to get user @{username} profile: @{error}",
+                username, result.Error);
+            return BadRequest(result.Error);
         }
 
-        return result.Success ? Ok(result.Value)
-            : BadRequest(result.Error);
+        _logger.LogInformation("Get user @{user} profle", result.Value.Username);
+        return Ok(result.Value);
     }
 
     [HttpPost("{username}/update")]
     public async Task<IActionResult> Update([FromBody] UpdatedProfile profile, string username)
     {
-        var currentUser = User?.Identity?.Name;
-        if (currentUser == null)
-            return Unauthorized("Cannot get current user");
+        var currentUser = User?.Identity?.Name
+            ?? throw new Exception("No username for an authorized user"); 
+
         if (username != "me")
         {
             if (currentUser != username)
-                return BadRequest("You have no rights to update this profile");
+            {
+                _logger.LogWarning("User @{user1} tries to uplade user's @{user2} profile",
+                    currentUser, username);
+                return Unauthorized("You have no rights to update this profile");
+            }
         }
         else username = currentUser;
 
-        var result = await _profiles.Update(username, profile.Username, profile.DisplayName, profile.Bio);
+        var result = await _profiles.Update(username, profile.Username,
+            profile.DisplayName, profile.Bio);
+        if (result.IsFailed)
+        {
+            _logger.LogError("Failed to update user @{user} profile: @{error}",
+                username, result.Error);
+            return BadRequest(result.Error);
+        }
 
-        return result.Success ? Ok("Profile updated")
-            : BadRequest(result.Error);
+        _logger.LogInformation("User @{user} updates user's @{user2} profile",
+            currentUser, username);
+        return Ok("Profile updated");
     }
 
     [HttpPost("{username}/delete")]
     public async Task<IActionResult> DeleteProfile(string username)
     {
-        var currentUser = User?.Identity?.Name; 
-        if (currentUser == null)
-            return Unauthorized("Cannot get current user");
+        var currentUser = User?.Identity?.Name
+            ?? throw new Exception("No username for an authorized user"); 
         
         if (username != "me")
         {
             if (currentUser != username)
-                return BadRequest("You have no rights to delete this profile");
+            {
+                _logger.LogWarning("User @{user1} tries to uplade user's @{user2} profile",
+                    currentUser, username);
+                return Unauthorized("You have no rights to update this profile");
+            }
         }
         else username = currentUser;
 
         var result = await _profiles.Delete(username);
         if (result.IsFailed)
-            BadRequest(result.Error);
+        {
+            _logger.LogError("Failed to delte user's @{user} profile: @{error}",
+                username, result.Error);
+            return BadRequest(result.Error);
+        }
 
+        _logger.LogInformation("User @{user} deletes user's @{user2} profile",
+            currentUser, username);
         await _auth.LogoutUser();
-
         return Ok("User profile was deleted permanently");
     }
 
     [HttpPost("{username}/update-image")]
     public async Task<IActionResult> UpdateImage(IFormFile image, string username)
     {
-        _logger.LogInformation("User @{Username} updates profile image", username);
-        if (username != User?.Identity?.Name)
-            return BadRequest("You have no rights to change this image");
+        var user = User?.Identity?.Name ??
+            throw new Exception("No username for an authorized user");
 
-        if (image == null || image.Length == 0)
-            return BadRequest("No file uploaded.");
-
-        const long maxSizeInBytes = 2 * 1024 * 1024; // 2mb
-        if (image.Length > maxSizeInBytes)
-            return BadRequest("File size exceeds 2MB.");
-
-        var allowedMimeTypes = new[] { "image/jpeg", "image/png" };
-
-        if (!allowedMimeTypes.Contains(image.ContentType))
-            return BadRequest("Invalid file type. Only JPEG, PNG are allowed.");
+        if (user != username)
+        {
+            _logger.LogWarning("User @{user} tries to update user's @{} image without permissions",
+                user, username);
+            return BadRequest("Have no rights to update this image");
+        }
+        if (!IsImageValid(image))
+        {
+            _logger.LogWarning("User @{user} tries to upload an invalid image: @{size}, @{type}",
+                user, image.Length, image.ContentType);
+            return BadRequest("Image is not valid (max size - 2MB, allowed types: jpeg, png)");
+        }
 
         using var stream = new MemoryStream();
         await image.CopyToAsync(stream);
         var bytes = stream.ToArray();
 
         var result = await _profiles.UpdateImage(username, bytes);
+        if (result.IsFailed)
+        {
+            _logger.LogError("Failed to update user's @{user} profile image: @{error}",
+                user, result.Error);
+            return BadRequest(result.Error);
+        }
 
-        return result.Success ? Ok("Profile image updated") 
-            : BadRequest(result.Error);
+        _logger.LogInformation("User @{user} updates user's @{user2} profile image",
+            user, username);
+        return Ok("Profile image updated"); 
+    }
+
+    private bool IsImageValid(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+            return false;
+
+        const long maxSizeInBytes = 2 * 1024 * 1024; // 2mb
+        if (image.Length > maxSizeInBytes)
+            return false;
+
+        var allowedMimeTypes = new[] { "image/jpeg", "image/png" };
+        if (!allowedMimeTypes.Contains(image.ContentType))
+            return false;
+
+        return true;
     }
 }
