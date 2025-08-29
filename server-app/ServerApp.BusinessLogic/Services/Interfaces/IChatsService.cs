@@ -13,7 +13,7 @@ public interface IChatsService
     /// <param name="ownderUsername">Owner username</param>
     /// <param name="type">Chat type</param>
     /// <returns>New chat ID</returns>
-    Task<Result<string>> Create(string title, string description, string ownderUsername, ChatType type);
+    Task<Result<string>> CreateChatAsync(string title, string description, string ownderUsername, ChatType type);
 
     /// <summary>
     /// Update chat information. 
@@ -22,7 +22,7 @@ public interface IChatsService
     /// <param name="title">New title</param>
     /// <param name="description">New description</param>
     /// <returns>Operation result</returns>
-    Task<Result> Update(string id, string title, string description);
+    Task<Result> UpdateChatAsync(string id, string title, string description);
 
     /// <summary>
     /// Update chat image.
@@ -30,28 +30,28 @@ public interface IChatsService
     /// <param name="id">Chat ID</param>
     /// <param name="bytes">Image bytes</param>
     /// <returns>Operation result</returns>
-    Task<Result> UpdateImage(string id, byte[] bytes);
+    Task<Result> UpdateImageAsync(string id, byte[] bytes);
 
     /// <summary>
     /// Delete chat.
     /// </summary>
     /// <param name="id">Chat ID</param>
     /// <returns>Operation result</returns>
-    Task<Result> Detele(string id);
+    Task<Result> DeteleChatAsync(string id);
 
     /// <summary>
     /// Get a chat by ID.
     /// </summary>
     /// <param name="id">Chat ID</param>
     /// <returns>Chat</returns>
-    Task<Result<Chat>> Get(string id);
+    Task<Result<Chat>> GetAsync(string id);
 
     /// <summary>
     /// Get chat list for given user.
     /// </summary>
     /// <param name="username">Username</param>
     /// <returns>Chat list</returns>
-    Task<List<ChatHeader>> GetForUser(string username);
+    Task<List<ChatHeader>> GetChatsForUserAsync(string username);
 
     /// <summary>
     /// Add member to a chat.
@@ -59,7 +59,7 @@ public interface IChatsService
     /// <param name="username">Member username</param>
     /// <param name="chatId">Chat ID</param>
     /// <returns>Operation result</returns>
-    Task<Result> AddMember(string username, string chatId);
+    Task<Result> AddMemberAsync(string username, string chatId);
 
     /// <summary>
     /// Change member role.
@@ -68,7 +68,7 @@ public interface IChatsService
     /// <param name="chatId">Chat ID</param>
     /// <param name="role">New role</param>
     /// <returns>Operation result</returns>
-    Task<Result> ChangeMemberRole(string username, string chatId, string role);
+    Task<Result> ChangeMemberRoleAsync(string username, string chatId, string role);
 
     /// <summary>
     /// Remove member from a chat.
@@ -76,14 +76,14 @@ public interface IChatsService
     /// <param name="username">Member username</param>
     /// <param name="chatId">Chat ID</param>
     /// <returns>Operation result</returns>
-    Task<Result> RemoveMember(string username, string chatId);
+    Task<Result> RemoveMemberAsync(string username, string chatId);
 
     /// <summary>
     /// Get stored chat messages.
     /// </summary>
     /// <param name="id">Chat ID</param>
     /// <returns>Chat messages</returns>
-    Task<List<Message>> GetMessages(string id);
+    Task<List<Message>> GetChatMessagesAsync(string id);
 
     /// <summary>
     /// Store message permanently
@@ -92,7 +92,7 @@ public interface IChatsService
     /// <param name="sender">Message sender</param>
     /// <param name="chatId">Chat ID</param>
     /// <returns>Message ID</returns>
-    Task<Result<string>> StoreMessage(string content, string sender, string chatId);
+    Task<Result<string>> StoreMessageAsync(string content, string sender, string chatId);
 
     /// <summary>
     /// Get chat member permissions 
@@ -100,5 +100,5 @@ public interface IChatsService
     /// <param name="chatId">Chat ID</param>
     /// <param name="username">Member's username</param>
     /// <returns>Permissions</returns>
-    Task<Result<ChatMemberPermissions>> GetMemberPermissions(string chatId, string username);
+    Task<Result<ChatMemberPermissions>> GetMemberPermissionsAsync(string chatId, string username);
 }

@@ -23,7 +23,7 @@ public class ImagesController : ControllerBase
         if (string.IsNullOrEmpty(id))
             return BadRequest("Profile image ID was not provided");
         
-        var result = await _images.GetProfileImage(id, (AvatarSize)size);
+        var result = await _images.GetProfileImageAsync(id, (AvatarSize)size);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to get user profile image: @{Error}", result.Error);
@@ -44,7 +44,7 @@ public class ImagesController : ControllerBase
         if (string.IsNullOrEmpty(id))
             return BadRequest("Chat image ID was not provided");
 
-        var result = await _images.GetChatImage(id, (AvatarSize)size);
+        var result = await _images.GetChatImageAsync(id, (AvatarSize)size);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to get chat image: @{Error}", result.Error);

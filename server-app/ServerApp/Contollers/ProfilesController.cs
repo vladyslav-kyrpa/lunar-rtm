@@ -24,8 +24,6 @@ public class ProfilesController : ControllerBase
         _logger = logger;
     }
 
-    public record UpdatedProfile(string Username, string DisplayName, string Bio);
-
     [HttpGet("{username}")]
     public async Task<IActionResult> GetProfile(string username)
     {
@@ -34,9 +32,9 @@ public class ProfilesController : ControllerBase
 
         Result<UserProfile> result;
         if (username == string.Empty || username == "me")
-            result = await _profiles.GetByUsername(currentUser);
+            result = await _profiles.GetAsync(currentUser);
         else
-            result = await _profiles.GetByUsername(username);
+            result = await _profiles.GetAsync(username);
 
         if (result.IsFailed)
         {
@@ -50,7 +48,7 @@ public class ProfilesController : ControllerBase
     }
 
     [HttpPost("{username}/update")]
-    public async Task<IActionResult> Update([FromBody] UpdatedProfile profile, string username)
+    public async Task<IActionResult> Update([FromBody] UpdateProfileRequest updatedProfile, string username)
     {
         var currentUser = User?.Identity?.Name
             ?? throw new Exception("No username for an authorized user"); 
@@ -66,8 +64,7 @@ public class ProfilesController : ControllerBase
         }
         else username = currentUser;
 
-        var result = await _profiles.Update(username, profile.Username,
-            profile.DisplayName, profile.Bio);
+        var result = await _profiles.UpdateAsync(username, updatedProfile);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to update user @{user} profile: @{error}",
@@ -97,7 +94,7 @@ public class ProfilesController : ControllerBase
         }
         else username = currentUser;
 
-        var result = await _profiles.Delete(username);
+        var result = await _profiles.DeleteAsync(username);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to delte user's @{user} profile: @{error}",
@@ -107,7 +104,7 @@ public class ProfilesController : ControllerBase
 
         _logger.LogInformation("User @{user} deletes user's @{user2} profile",
             currentUser, username);
-        await _auth.LogoutUser();
+        await _auth.LogoutUserAsync();
         return Ok("User profile was deleted permanently");
     }
 
@@ -134,7 +131,7 @@ public class ProfilesController : ControllerBase
         await image.CopyToAsync(stream);
         var bytes = stream.ToArray();
 
-        var result = await _profiles.UpdateImage(username, bytes);
+        var result = await _profiles.UpdateImageAsync(username, bytes);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to update user's @{user} profile image: @{error}",

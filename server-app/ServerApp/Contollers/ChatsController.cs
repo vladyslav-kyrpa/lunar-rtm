@@ -32,7 +32,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var chat = await _chats.Get(id);
+        var chat = await _chats.GetAsync(id);
         if (chat.IsFailed)
         {
             _logger.LogError("Error during getting chat by ID @{id}: @{error}",
@@ -40,7 +40,7 @@ public class ChatsController : ControllerBase
             return BadRequest(chat.Error);
         }
 
-        var permissions = await _chats.GetMemberPermissions(id, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(id, user);
         if (permissions.IsFailed)
         {
             _logger.LogError("Error during getting chat @{id} member's @{user} permissions: @{error}",
@@ -63,7 +63,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var chats = await _chats.GetForUser(user);
+        var chats = await _chats.GetChatsForUserAsync(user);
 
         _logger.LogInformation("Get chats for user @{user}", user);
         return Ok(chats);
@@ -75,7 +75,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user");
 
-        var result = await _chats.Create(chat.Title, chat.Description, user, (ChatType)chat.Type);
+        var result = await _chats.CreateChatAsync(chat.Title, chat.Description, user, (ChatType)chat.Type);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to create new chat: @{Error}", result.Error);
@@ -95,7 +95,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var permissions = await _chats.GetMemberPermissions(id, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(id, user);
         if (permissions.IsFailed)
         {
             _logger.LogError("Error during getting chat @{id} member's @{user} permissions: @{error}",
@@ -109,7 +109,7 @@ public class ChatsController : ControllerBase
             return Unauthorized("You have no rights to update this conversation");
         }
 
-        var result = await _chats.Update(id, chat.Title, chat.Description);
+        var result = await _chats.UpdateChatAsync(id, chat.Title, chat.Description);
         if(result.IsFailed)
         {
             _logger.LogError("Failed to update chat @{id}: @{error}",
@@ -127,7 +127,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var permissions = await _chats.GetMemberPermissions(id, user ?? "");
+        var permissions = await _chats.GetMemberPermissionsAsync(id, user ?? "");
         if(permissions.IsFailed)
         {
             _logger.LogError("Failed to get chat member's permissions: @{error}",
@@ -141,7 +141,7 @@ public class ChatsController : ControllerBase
             return BadRequest("You have no permissions");
         }
 
-        var result = await _chats.Detele(id);
+        var result = await _chats.DeteleChatAsync(id);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to remove chat: @{error}", result.Error);
@@ -163,7 +163,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(chatId, user);
         if(permissions.IsFailed)
         {
             _logger.LogError("Failed to get chat member's permissions: @{error}",
@@ -177,7 +177,7 @@ public class ChatsController : ControllerBase
             return Unauthorized("You have no rights to add members");
         }
 
-        var result = await _chats.AddMember(member.Username, chatId);
+        var result = await _chats.AddMemberAsync(member.Username, chatId);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to add chat member: @{error}", result.Error);
@@ -198,7 +198,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(chatId, user);
         if(permissions.IsFailed)
         {
             _logger.LogError("Failed to get chat member's permissions: @{error}",
@@ -212,7 +212,7 @@ public class ChatsController : ControllerBase
             return Unauthorized("You have no rights to change member's role");
         }
 
-        var result = await _chats.ChangeMemberRole(promotion.Username, chatId, promotion.Role);
+        var result = await _chats.ChangeMemberRoleAsync(promotion.Username, chatId, promotion.Role);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to change member role: @{error}", result.Error);
@@ -235,7 +235,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(chatId, user);
         if(permissions.IsFailed)
         {
             _logger.LogError("Failed to get chat member's permissions: @{error}",
@@ -249,7 +249,7 @@ public class ChatsController : ControllerBase
             return Unauthorized("You have no rights to remove members");
         }
 
-        var result = await _chats.RemoveMember(member.Username, chatId);
+        var result = await _chats.RemoveMemberAsync(member.Username, chatId);
         if (result.IsFailed)
         {
             _logger.LogError("Failed to remove user from a chat: @{error}", result.Error);
@@ -270,7 +270,7 @@ public class ChatsController : ControllerBase
         var user = User?.Identity?.Name ??
             throw new Exception("No username for an authorized user"); 
 
-        var result = await _chats.RemoveMember(user, chatId);
+        var result = await _chats.RemoveMemberAsync(user, chatId);
         if(result.IsFailed)
         {
             _logger.LogError("Failed to remove member {user} from chat @{chat}: @{error}",
@@ -288,7 +288,7 @@ public class ChatsController : ControllerBase
         if (string.IsNullOrEmpty(id))
             return BadRequest("No id provided");
 
-        var messages = await _chats.GetMessages(id);
+        var messages = await _chats.GetChatMessagesAsync(id);
 
         _logger.LogInformation("Get chat @{chat} messages", id);
         return Ok(messages);
@@ -310,7 +310,7 @@ public class ChatsController : ControllerBase
             return BadRequest("Image is not valid (max size - 2MB, allowed types: jpeg, png)");
         }
 
-        var permissions = await _chats.GetMemberPermissions(chatId, user);
+        var permissions = await _chats.GetMemberPermissionsAsync(chatId, user);
         if(permissions.IsFailed)
         {
             _logger.LogError("Failed to get chat member's permissions: @{error}",
@@ -328,7 +328,7 @@ public class ChatsController : ControllerBase
         await image.CopyToAsync(stream);
         var bytes = stream.ToArray();
 
-        var result = await _chats.UpdateImage(chatId, bytes);
+        var result = await _chats.UpdateImageAsync(chatId, bytes);
         if(result.IsFailed)
         {
             _logger.LogError("Failed to update chat @{chat} image: @{error}",

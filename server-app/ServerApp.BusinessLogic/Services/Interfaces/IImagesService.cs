@@ -10,7 +10,7 @@ public interface IImagesService
     /// <param name="id">Image ID</param>
     /// <param name="size">Size</param>
     /// <returns>Image data</returns>
-    Task<Result<ImageData>> GetProfileImage(string id, AvatarSize size);
+    Task<Result<ImageData>> GetProfileImageAsync(string id, AvatarSize size);
 
     /// <summary>
     /// Get chat image of a given size.
@@ -18,7 +18,7 @@ public interface IImagesService
     /// <param name="id">Image ID</param>
     /// <param name="size">Size</param>
     /// <returns>Image data</returns>
-    Task<Result<ImageData>> GetChatImage(string id, AvatarSize size);
+    Task<Result<ImageData>> GetChatImageAsync(string id, AvatarSize size);
 }
 
 public class ImageData

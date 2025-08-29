@@ -10,24 +10,22 @@ public interface IProfilesService
     /// </summary>
     /// <param name="username">Username</param>
     /// <returns>User profile</returns>
-    Task<Result<UserProfile>> GetByUsername(string username);
+    Task<Result<UserProfile>> GetAsync(string username);
 
     /// <summary>
     /// Update user's public information.
     /// </summary>
     /// <param name="username">Old username</param>
-    /// <param name="newUsername">Updated username</param>
-    /// <param name="newDisplayName">Updated display name</param>
-    /// <param name="newBio">Updated bio</param>
+    /// <param name="request">Updated profile values</param>
     /// <returns>Operation result</returns>
-    Task<Result> Update(string username, string newUsername, string? newDisplayName, string? newBio);
+    Task<Result> UpdateAsync(string username, UpdateProfileRequest request);
 
     /// <summary>
     /// Delete user profile
     /// </summary>
     /// <param name="username">Username</param>
     /// <returns>Operation result</returns>
-    Task<Result> Delete(string username);
+    Task<Result> DeleteAsync(string username);
 
     /// <summary>
     /// Update user profile image.
@@ -35,5 +33,12 @@ public interface IProfilesService
     /// <param name="username">Username</param>
     /// <param name="bytes">Image bytes</param>
     /// <returns>Operation result</returns>
-    Task<Result> UpdateImage(string username, byte[] bytes);
+    Task<Result> UpdateImageAsync(string username, byte[] bytes);
+}
+
+public class UpdateProfileRequest
+{
+    public string Username { get; set;} = string.Empty;
+    public string? DisplayName { get; set;}
+    public string? Bio { get; set;}
 }

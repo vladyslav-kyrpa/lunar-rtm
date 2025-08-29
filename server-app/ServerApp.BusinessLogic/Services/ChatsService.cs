@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServerApp.BusinessLogic.Common;
@@ -29,24 +28,24 @@ public class ChatsServices : IChatsService
         _images = images;
     }
 
-    public async Task<Result> AddMember(string username, string chatId)
+    public async Task<Result> AddMemberAsync(string username, string chatId)
     {
         var user = await _users.FindByNameAsync(username);
         if (user == null)
             return Result.Fail("User was not found");
 
         var chat = await _chats.Get(chatId);
-        if(chat == null)
+        if (chat == null)
             return Result.Fail("Chat was not found");
 
-        if(chat.Type == (int)ChatType.Dialogue && chat.Members.Count >= 2)
+        if (chat.Type == (int)ChatType.Dialogue && chat.Members.Count >= 2)
             return Result.Fail("Dialogue can have only two members");
 
         await _chats.AddMember(chatId, user.Id, ChatMemberRole.Regular);
         return Result.Ok();
     }
 
-    public async Task<Result<string>> Create(string title, string description, string ownerUsername, ChatType type)
+    public async Task<Result<string>> CreateChatAsync(string title, string description, string ownerUsername, ChatType type)
     {
         if (!ChatInputValidator.IsValidTitle(title))
             return Result<string>.Fail("Title is not valid");
@@ -62,7 +61,7 @@ public class ChatsServices : IChatsService
         return Result<string>.Ok(id);
     }
 
-    public async Task<Result> Detele(string id)
+    public async Task<Result> DeteleChatAsync(string id)
     {
         if (!await _chats.IsExists(id))
             return Result.Fail("Chat was not found");
@@ -71,15 +70,18 @@ public class ChatsServices : IChatsService
         return Result.Ok();
     }
 
-    public async Task<Result<Chat>> Get(string id)
+    public async Task<Result<Chat>> GetAsync(string id)
     {
         var chat = await _chats.Get(id);
-        if(chat == null)
+        if (chat == null)
             return Result<Chat>.Fail("Chat was not found");
-        
-        var members = chat.Members.Select(m=>UserEntityToHeader(m.User ?? 
-            throw new Exception("Member user is null")));
+        return Result<Chat>.Ok(EntityToModel(chat));
+    }
 
+    private Chat EntityToModel(ChatEntity chat)
+    {
+        var members = chat.Members.Select(m => UserEntityToHeader(m.User ??
+            throw new Exception("Member user is null")));
         var model = new Chat
         {
             Id = chat.Id.ToString(),
@@ -89,7 +91,7 @@ public class ChatsServices : IChatsService
             ImageId = chat.ImageId.ToString() ?? "empty",
             Members = members.ToList()
         };
-        return Result<Chat>.Ok(model);
+        return model;
     }
 
     private UserProfileHeader UserEntityToHeader(UserProfileEntity user)
@@ -103,13 +105,15 @@ public class ChatsServices : IChatsService
         };
     }
 
-    public async Task<List<ChatHeader>> GetForUser(string username)
+    public async Task<List<ChatHeader>> GetChatsForUserAsync(string username)
     {
-        var user = await _users.FindByNameAsync(username);
-        if (user == null)
+        var user = (await _users.FindByNameAsync(username)) ??
             throw new ArgumentException(nameof(username), "User was not found");
+        return EntitiesToHeaders(_chats.GetList(user.Id));
+    }
 
-        var chats = _chats.GetList(user.Id);
+    private static List<ChatHeader> EntitiesToHeaders(IQueryable<ChatEntity> chats)
+    {
         return chats.Select(c => new ChatHeader
         {
             Id = c.Id.ToString(),
@@ -118,11 +122,11 @@ public class ChatsServices : IChatsService
         }).ToList();
     }
 
-    public async Task<Result> RemoveMember(string username, string chatId)
+    public async Task<Result> RemoveMemberAsync(string username, string chatId)
     {
         var user = await _users.FindByNameAsync(username);
         if (user == null)
-            return Result.Fail("User was not found"); 
+            return Result.Fail("User was not found");
 
         if (!await _chats.IsExists(chatId))
             return Result.Fail("Chat was not found");
@@ -136,7 +140,7 @@ public class ChatsServices : IChatsService
         return Result.Ok();
     }
 
-    public async Task<Result> Update(string id, string title, string description)
+    public async Task<Result> UpdateChatAsync(string id, string title, string description)
     {
         if (!ChatInputValidator.IsValidTitle(title))
             return Result.Fail("Title is not valid");
@@ -144,48 +148,53 @@ public class ChatsServices : IChatsService
             return Result.Fail("Description is not valid");
 
         var chat = await _chats.Get(id);
-        if(chat == null)
+        if (chat == null)
             return Result.Fail($"Chat:{id} doesn't exist");
 
         chat.Description = description;
         chat.Title = title;
-        
+
         await _chats.Update(chat);
+
         return Result.Ok();
     }
 
-    public async Task<List<Message>> GetMessages(string id)
+    public async Task<List<Message>> GetChatMessagesAsync(string id)
     {
         if (!await _chats.IsExists(id))
             throw new ArgumentException(nameof(id), "Chat was not found");
-        var messages = _messages.GetByChatId(id).ToList();
 
-        // Get senders
+        var messages = _messages.GetByChatId(id).ToList();
+        var senders = await GetSenders(messages);
+
+        return messages
+            .Select(m => MessageEntityToModel(m, senders))
+            .ToList();
+    }
+
+    private static Message MessageEntityToModel(MessageEntity message,
+        Dictionary<string, UserProfileEntity> senders) => new()
+        {
+            Id = message.Id.ToString(),
+            Content = message.Content,
+            Timestamp = message.CreationDate,
+            Sender = message.SenderId == null
+                ? "deleted-user"
+                : senders[message.SenderId].UserName ?? throw new Exception("User with no username"),
+        };
+
+    private async Task<Dictionary<string, UserProfileEntity>> GetSenders(List<MessageEntity> messages)
+    {
         var ids = messages.Select(m => m.SenderId).ToList();
         var pairs = await _users.Users
             .Where(u => ids.Contains(u.Id))
             .Select(i => new KeyValuePair<string, UserProfileEntity>(i.Id, i))
             .ToListAsync();
         var senders = new Dictionary<string, UserProfileEntity>(pairs);
-
-        // Map and return
-        var model = new List<Message>();
-        foreach (var m in messages)
-        {
-            model.Add(new Message
-            {
-                Id = m.Id.ToString(),
-                Content = m.Content,
-                Timestamp = m.CreationDate,
-                Sender = m.SenderId == null
-                    ? "deleted-user"
-                    : senders[m.SenderId].UserName ?? throw new Exception("User with no username"),
-            });
-        }
-        return model;
+        return senders;
     }
 
-    public async Task<Result> UpdateImage(string id, byte[] bytes)
+    public async Task<Result> UpdateImageAsync(string id, byte[] bytes)
     {
         var chat = await _chats.Get(id);
         if (chat == null)
@@ -210,6 +219,7 @@ public class ChatsServices : IChatsService
             BytesMedium = imgMedium,
             BytesLarge = imgLarge,
         });
+
         return Result.Ok();
     }
 
@@ -227,12 +237,12 @@ public class ChatsServices : IChatsService
         return stream.ToArray();
     }
 
-    public async Task<Result<string>> StoreMessage(string content, string sender, string chatId)
+    public async Task<Result<string>> StoreMessageAsync(string content, string sender, string chatId)
     {
         var user = await _users.FindByNameAsync(sender);
         if (user == null)
             return Result<string>.Fail("Sender was not found");
-        if(!await _chats.IsExists(chatId))
+        if (!await _chats.IsExists(chatId))
             return Result<string>.Fail("Chat was not found");
 
         var id = await _messages.Add(content, user.Id, chatId);
@@ -240,7 +250,7 @@ public class ChatsServices : IChatsService
         return Result<string>.Ok(id);
     }
 
-    public async Task<Result<ChatMemberPermissions>> GetMemberPermissions(string chatId, string username)
+    public async Task<Result<ChatMemberPermissions>> GetMemberPermissionsAsync(string chatId, string username)
     {
         if (!await _chats.IsExists(chatId))
             return Result<ChatMemberPermissions>.Fail("Chat was not found");
@@ -253,13 +263,13 @@ public class ChatsServices : IChatsService
         if (member == null)
             return Result<ChatMemberPermissions>.Fail("User is not a member");
 
-        var permissions = new ChatMemberPermissions(member?.Role ?? 
+        var permissions = new ChatMemberPermissions(member?.Role ??
             throw new Exception("Member role is null"));
 
         return Result<ChatMemberPermissions>.Ok(permissions);
     }
 
-    public async Task<Result> ChangeMemberRole(string username, string chatId, string role)
+    public async Task<Result> ChangeMemberRoleAsync(string username, string chatId, string role)
     {
         var user = await _users.FindByNameAsync(username);
         if (user == null)
@@ -269,31 +279,28 @@ public class ChatsServices : IChatsService
         if (member == null)
             return Result.Fail("User is not a member");
 
-        if(member.Role == ChatMemberRole.Owner)
+        if (member.Role == ChatMemberRole.Owner)
             return Result.Fail("Cannot change an owner");
 
-        switch (role)
-        {
-            case "regular": member.Role = ChatMemberRole.Regular; break;
-            case "moderator": member.Role = ChatMemberRole.Moderator; break;
-            default: return Result.Fail("Unsupported role");
-        }
+        var chatMemberRole = MapStringToRole(role);
+        if (chatMemberRole == null)
+            return Result.Fail("Unsupported role");
+
+        member.Role = chatMemberRole ??
+            throw new Exception("Role shouldn't be null here");
 
         await _chats.UpdateMember(member);
 
-        return Result.Ok(); 
-    }
-}
-
-public class ChatInputValidator
-{
-    public static bool IsValidTitle(string value)
-    {
-        return value != null && value.Length > 0 && value.Length <= 100;
+        return Result.Ok();
     }
 
-    public static bool IsValidDescription(string value)
+    private static ChatMemberRole? MapStringToRole(string value)
     {
-        return value != null && value.Length > 0 && value.Length <= 500;
+        return value switch
+        {
+            "regular" => ChatMemberRole.Regular,
+            "moderator" => ChatMemberRole.Moderator,
+            _ => null
+        };
     }
 }

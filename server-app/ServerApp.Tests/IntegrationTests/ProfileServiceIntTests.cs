@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ServerApp.BusinessLogic.Services;
+using ServerApp.BusinessLogic.Services.Interfaces;
 using ServerApp.DataAccess;
 using ServerApp.DataAccess.Repositories;
 
@@ -69,17 +70,19 @@ public class ProfilesServiceIntTests
         // Arrange
         var users = await SeedUsers();
         var user = users[0];
-        var newUsername = "new-username";
-        var newDisplayName = "Display Name";
-        var newBio = "New Bio";
-
+        var request = new UpdateProfileRequest
+        {
+            Username = "new-username",
+            DisplayName = "Display Name",
+            Bio = "New Bio"
+        };
         // Act
-        var result = await _service.Update(user.UserName ?? "", newUsername, newDisplayName, newBio);
+        var result = await _service.UpdateAsync(user.UserName ?? "", request);
 
         // Assert
         Console.WriteLine(result.Error);
         Assert.True(result.Success);
-        var updatedUser = await _users.FindByNameAsync(newUsername ?? "");
+        var updatedUser = await _users.FindByNameAsync(request.Username ?? "");
         Assert.NotNull(updatedUser);
         Assert.Equal(user.Id, updatedUser.Id);
         Assert.Equal(user.DisplayName, updatedUser.DisplayName);
@@ -91,13 +94,16 @@ public class ProfilesServiceIntTests
     public async Task UpdateNonExistingUserTest()
     {
         // Arrange
-        var newUsername = "new-username";
-        var newDisplayName = "Display Name";
-        var newBio = "New Bio";
+        var request = new UpdateProfileRequest
+        {
+            Username = "new-username",
+            DisplayName = "Display Name",
+            Bio = "New Bio"
+        };
 
         // Act
         var result = await _service
-            .Update("non-existing", newUsername, newDisplayName, newBio);
+            .UpdateAsync("non-existing", request);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -109,33 +115,42 @@ public class ProfilesServiceIntTests
         // Arrange
         var users = await SeedUsers();
         var user = users[0];
-        var newUsername = "user2";
-        var newDisplayName = "Display Name";
-        var newBio = "New Bio";
+        var request = new UpdateProfileRequest
+        {
+            Username = "user2",
+            DisplayName = "Display Name",
+            Bio = "New Bio"
+        };
 
         // Act
         var result = await _service
-            .Update(user.UserName ?? "", newUsername, newDisplayName, newBio);
+            .UpdateAsync(user.UserName ?? "", request);
 
         // Assert
         Assert.True(result.IsFailed);
     }
 
     [Theory]
-    [InlineData("invalid name", "Some displayname", "some bio", true)]
-    [InlineData("InvalidName", "Some displayname", "some bio", true)]
-    [InlineData("new-username", "", "some bio", false)]
-    [InlineData("user1", "", "some bio", false)]
     [InlineData("new-username", null, "some bio", false)]
     [InlineData("new-username", "some displayname", "", false)]
+    [InlineData("new-username", "", "some bio", false)]
+    [InlineData("invalid name", "Some displayname", "some bio", true)]
+    [InlineData("InvalidName", "Some displayname", "some bio", true)]
+    [InlineData("user1", "", "some bio", false)]
     public async Task UpdateUserInputValidationTest(string username, string displayName, string bio, bool shouldFail)
     {
         // Arrange
         var users = await SeedUsers();
         var user = users[0];
+        var request = new UpdateProfileRequest
+        {
+            Username = username,
+            DisplayName = displayName,
+            Bio = bio 
+        };
 
         // Act
-        var result = await _service.Update(user.UserName ?? "", username, displayName, bio);
+        var result = await _service.UpdateAsync(user.UserName ?? "", request);
 
         // Assert
         if (shouldFail) Assert.True(result.IsFailed);

@@ -30,7 +30,7 @@ public class ChatHub : Hub
         if (username != null && connectionId != null)
         {
             _logger.LogInformation("User @{username} connected", username);
-            _connections.Add(username, connectionId);
+            _connections.AddAsync(username, connectionId);
         }
         else _logger.LogError("Failed to connect a user. Username or connectionId is null");
 
@@ -47,7 +47,7 @@ public class ChatHub : Hub
         }
         else if (connectionId != null)
         {
-            _connections.Remove(Context.ConnectionId);
+            _connections.RemoveAsync(Context.ConnectionId);
             _logger.LogInformation("User @{User} has disconnected",
                 Context?.User?.Identity?.Name);
         }
@@ -71,7 +71,7 @@ public class ChatHub : Hub
             return;
         }
 
-        var result = await _chats.StoreMessage(message.Content, sender, message.ChatId);
+        var result = await _chats.StoreMessageAsync(message.Content, sender, message.ChatId);
 
         if (result.IsFailed)
         {
@@ -93,7 +93,7 @@ public class ChatHub : Hub
 
     private async Task<List<string>> GetChatMemberConnnections(string chatId)
     {
-        var result = await _chats.Get(chatId);
+        var result = await _chats.GetAsync(chatId);
         if (result.IsFailed)
             return [];
 
@@ -101,6 +101,6 @@ public class ChatHub : Hub
             .Select(m => m.Username)
             .ToArray();
 
-        return _connections.GetMultiple(members);
+        return _connections.GetMultipleAsync(members);
     }
 }

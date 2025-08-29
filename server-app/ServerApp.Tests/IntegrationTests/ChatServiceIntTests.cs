@@ -108,7 +108,7 @@ public class ChatsServiceIntTests
         var type = ChatType.Polylogue;
 
         // Act
-        var result = await _service.Create(title, description, owner.UserName ?? "", type);
+        var result = await _service.CreateChatAsync(title, description, owner.UserName ?? "", type);
 
         // Assert
         Assert.True(result.Success);
@@ -130,7 +130,7 @@ public class ChatsServiceIntTests
     public async Task CreateChatWithUnknownOwner()
     {
         // Act
-        var result = await _service.Create("title", "desc", "random-user", ChatType.Polylogue);
+        var result = await _service.CreateChatAsync("title", "desc", "random-user", ChatType.Polylogue);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -151,7 +151,7 @@ public class ChatsServiceIntTests
         var owner = users[1];
 
         // Act
-        var result = await _service.Create(title, description, owner.UserName ?? "", ChatType.Polylogue);
+        var result = await _service.CreateChatAsync(title, description, owner.UserName ?? "", ChatType.Polylogue);
         if (shouldFail) Assert.True(result.IsFailed);
         else Assert.True(result.Success);
     }
@@ -165,7 +165,7 @@ public class ChatsServiceIntTests
         var description = "new description";
 
         // Act
-        var result = await _service.Update(chats[0].Id.ToString(), title, description);
+        var result = await _service.UpdateChatAsync(chats[0].Id.ToString(), title, description);
 
         // Assert
         Assert.True(result.Success);
@@ -189,7 +189,7 @@ public class ChatsServiceIntTests
         var description = new string('a', descriptionLength);
 
         // Act
-        var result = await _service.Update(chats[0].Id.ToString(), title, description);
+        var result = await _service.UpdateChatAsync(chats[0].Id.ToString(), title, description);
 
         // Assert
         if (shouldFail) Assert.True(result.IsFailed);
@@ -205,7 +205,7 @@ public class ChatsServiceIntTests
         var user = "user3";
 
         // Act
-        var result = await _service.AddMember(user, chat);
+        var result = await _service.AddMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.Success);
@@ -225,7 +225,7 @@ public class ChatsServiceIntTests
         var user = "random";
 
         // Act
-        var result = await _service.AddMember(user, chat);
+        var result = await _service.AddMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -239,7 +239,7 @@ public class ChatsServiceIntTests
         var user = "user1";
 
         // Act
-        var result = await _service.AddMember(user, chat);
+        var result = await _service.AddMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -254,7 +254,7 @@ public class ChatsServiceIntTests
         var user = "user3";
 
         // Act
-        var result = await _service.RemoveMember(user, chat);
+        var result = await _service.RemoveMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.Success);
@@ -275,7 +275,7 @@ public class ChatsServiceIntTests
         var owner = await _users.FindByIdAsync(ownerId.UserId);
 
         // Act
-        var result = await _service.RemoveMember(owner?.UserName ?? "", chat.Id.ToString());
+        var result = await _service.RemoveMemberAsync(owner?.UserName ?? "", chat.Id.ToString());
 
         // Assert
         Assert.True(result.IsFailed);
@@ -290,7 +290,7 @@ public class ChatsServiceIntTests
         var user = "random";
 
         // Act
-        var result = await _service.AddMember(user, chat);
+        var result = await _service.AddMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -304,7 +304,7 @@ public class ChatsServiceIntTests
         var user = "user1";
 
         // Act
-        var result = await _service.AddMember(user, chat);
+        var result = await _service.AddMemberAsync(user, chat);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -318,7 +318,7 @@ public class ChatsServiceIntTests
         var id = chats[0].Id.ToString();
 
         // Act
-        var result = await _service.Detele(id);
+        var result = await _service.DeteleChatAsync(id);
 
         // Arrange
         Assert.True(result.Success);
@@ -334,7 +334,7 @@ public class ChatsServiceIntTests
         var id = Guid.NewGuid();
 
         // Act
-        var result = await _service.Detele(id.ToString());
+        var result = await _service.DeteleChatAsync(id.ToString());
 
         // Arrange
         Assert.True(result.IsFailed);
@@ -348,7 +348,7 @@ public class ChatsServiceIntTests
 
         // Act
         var result = await _service
-            .ChangeMemberRole("user3", chats[1].Id.ToString(), "moderator");
+            .ChangeMemberRoleAsync("user3", chats[1].Id.ToString(), "moderator");
 
         // Assert
         Assert.True(result.Success); 
@@ -365,7 +365,7 @@ public class ChatsServiceIntTests
         var chats = await SeedChats();
 
         // Act
-        var result = await _service.ChangeMemberRole("user2", chats[1].Id.ToString(), "moderator");
+        var result = await _service.ChangeMemberRoleAsync("user2", chats[1].Id.ToString(), "moderator");
 
         // Assert
         Assert.True(result.IsFailed);

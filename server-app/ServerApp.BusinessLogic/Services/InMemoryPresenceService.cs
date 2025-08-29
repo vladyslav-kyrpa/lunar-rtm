@@ -7,7 +7,7 @@ public class PresenceService : IPresenceService
     private Dictionary<string, HashSet<string>> _connections = []; // username, connectionID
     private readonly object _lock = new object();
 
-    public void Add(string username, string connnection)
+    public void AddAsync(string username, string connnection)
     {
         lock (_lock)
         {
@@ -17,7 +17,7 @@ public class PresenceService : IPresenceService
         }
     }
 
-    public List<string> GetMultiple(string[] usernames)
+    public List<string> GetMultipleAsync(string[] usernames)
     {
         lock (_lock)
         {
@@ -28,7 +28,7 @@ public class PresenceService : IPresenceService
         }
     }
 
-    public void Remove(string connection)
+    public void RemoveAsync(string connection)
     {
         lock (_lock)
         {

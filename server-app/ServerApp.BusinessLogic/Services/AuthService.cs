@@ -13,7 +13,7 @@ public class AuthService : IAuthService
         _signInManager = signInManager;
     }
 
-    public async Task<Result> LoginUser(string username, string password)
+    public async Task<Result> LoginUserAsync(string username, string password)
     {
         var result = await _signInManager.PasswordSignInAsync(
             username,
@@ -26,34 +26,47 @@ public class AuthService : IAuthService
             : Result.Fail("Invalid username or password");
     }
 
-    public async Task<Result> RegisterUser(string username, string password, string? displayName, string email)
+    public async Task<Result> RegisterUserAsync(RegisterProfileRequest request)
     {
-        if (!UserProfileInputValidator.IsUsernameValid(username))
-            return Result.Fail("Username is invalid");
-        if (!UserProfileInputValidator.IsEmailValid(email))
-            return Result.Fail("Email is invalid");
-        if (await _signInManager.UserManager.FindByNameAsync(username) != null)
-            return Result.Fail("Username is already taken");
-        if(string.IsNullOrEmpty(displayName))
-            displayName = username.ToUpper();
+        var validationResult = await ValidateRegisterRequest(request);
+        if (validationResult.IsFailed)
+            return validationResult;
 
-        var user = new UserProfileEntity
-        {
-            UserName = username,
-            Email = email,
-            DisplayName = displayName,
-            CreationDate = DateTime.UtcNow
-        };
-        var result = await _signInManager.UserManager.CreateAsync(user, password);
+        var result = await _signInManager.UserManager
+            .CreateAsync(RequestToUser(request), request.Password);
 
         if (result.Succeeded)
             return Result.Ok();
 
-        var errors = string.Join(". ", result.Errors.Select(e=>e.Description).ToList());
+        var errors = string.Join("; ", result.Errors.Select(e => e.Description).ToList());
         return Result.Fail(errors);
     }
 
-    public async Task LogoutUser()
+    private static UserProfileEntity RequestToUser(RegisterProfileRequest request) => new()
+    {
+        UserName = request.UserName,
+        Email = request.Email,
+        DisplayName = request.DisplayName ?? request.UserName.ToUpper(),
+        CreationDate = DateTime.UtcNow
+    };
+
+    private async Task<Result> ValidateRegisterRequest(RegisterProfileRequest request) {
+        if (!UserProfileInputValidator.IsUsernameValid(request.UserName))
+            return Result.Fail("Username is invalid");
+        if (!UserProfileInputValidator.IsEmailValid(request.Email))
+            return Result.Fail("Email is invalid");
+        if (await IsUsernameTaken(request.UserName))
+            return Result.Fail("Username is already taken");
+        return Result.Ok();
+    }
+    
+
+    private async Task<bool> IsUsernameTaken(string username)
+    {
+        return await _signInManager.UserManager.FindByNameAsync(username) != null;
+    }
+
+    public async Task LogoutUserAsync()
     {
         await _signInManager.SignOutAsync();
     }

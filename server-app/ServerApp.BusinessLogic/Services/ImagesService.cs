@@ -16,35 +16,39 @@ public class ImagesService : IImagesService
         _chatImages = chatImages;
     }
 
-    public async Task<Result<ImageData>> GetChatImage(string id, AvatarSize size)
+    public async Task<Result<ImageData>> GetChatImageAsync(string id, AvatarSize size)
     {
+        if (!IsValidSize((int)size))
+            return Result<ImageData>.Fail("Image size is not supported");
+
         var image = await _chatImages.Get(id, (ImageSize)size);
         if (image == null)
             return Result<ImageData>.Fail("Chat image was not found");
 
-        var img = new ImageData
-        {
-            Id = image.Id.ToString(),
-            Type = "webp",
-            Bytes = image.Bytes
-        };
-
-        return Result<ImageData>.Ok(img);
+        return Result<ImageData>
+            .Ok(ConvertToImageData(image));
     }
 
-    public async Task<Result<ImageData>> GetProfileImage(string id, AvatarSize size)
+    public async Task<Result<ImageData>> GetProfileImageAsync(string id, AvatarSize size)
     {
+        if (!IsValidSize((int)size))
+            return Result<ImageData>.Fail("Image size is not supported");
+
         var image = await _profileImages.Get(id, (ImageSize)size);
         if (image == null)
             return Result<ImageData>.Fail("Profile image was not found");
 
-        var img = new ImageData
-        {
-            Id = image.Id.ToString(),
-            Type = "webp",
-            Bytes = image.Bytes
-        };
-
-        return Result<ImageData>.Ok(img);
+        return Result<ImageData>
+            .Ok(ConvertToImageData(image));
     }
+
+    private static bool IsValidSize(int size)
+        => Enum.IsDefined(typeof(ImageSize), size);
+
+    private static ImageData ConvertToImageData(ImageEntity image) => new()
+    {
+        Id = image.Id.ToString(),
+        Type = "webp",
+        Bytes = image.Bytes
+    };
 }

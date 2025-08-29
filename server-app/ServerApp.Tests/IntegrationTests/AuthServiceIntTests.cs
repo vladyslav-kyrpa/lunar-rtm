@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ServerApp.BusinessLogic.Services;
+using ServerApp.BusinessLogic.Services.Interfaces;
 using ServerApp.DataAccess;
 
 namespace ServerApp.Tests.IntegrationTests;
@@ -67,20 +68,23 @@ public class AuthServiceIntTests
     public async Task RegisterUserTest()
     {
         // Arrange
-        var username = "test-user";
-        var displayName = "Test User";
-        var email = "testuser@mail.com";
-        var password = "Valid1!";
+        var request = new RegisterProfileRequest
+        {
+            UserName = "test-user",
+            DisplayName = "Test User",
+            Email = "testuser@mail.com",
+            Password = "Valid1!"
+        };
 
         // Act
-        await _service.RegisterUser(username, password, displayName, email);
+        await _service.RegisterUserAsync(request);
 
         // Assert
-        var user = await _signInManager.UserManager.FindByNameAsync(username);
+        var user = await _signInManager.UserManager.FindByNameAsync(request.UserName);
         Assert.NotNull(user);
-        Assert.Equal(displayName, user.DisplayName);
-        Assert.Equal(email, user.Email);
-        var passwordCheck = await _signInManager.CheckPasswordSignInAsync(user, password, false);
+        Assert.Equal(request.DisplayName, user.DisplayName);
+        Assert.Equal(request.Email, user.Email);
+        var passwordCheck = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
         Assert.True(passwordCheck.Succeeded);
     }
 
@@ -89,12 +93,16 @@ public class AuthServiceIntTests
     {
         // Arrange
         var user = await SeedUser();
-        var email = "user@mail.com";
-        var displayName = "display-name";
-        var password = "Password!1";
+        var request = new RegisterProfileRequest
+        {
+            UserName = user.UserName ?? "",
+            Email = "user@mail.com",
+            DisplayName = "display-name",
+            Password = "Password!1"
+        };
 
         // Act
-        var result = await _service.RegisterUser(user.UserName ?? "", password, displayName, email);
+        var result = await _service.RegisterUserAsync(request);
 
         // Assert
         Assert.True(result.IsFailed);
@@ -108,8 +116,17 @@ public class AuthServiceIntTests
     [InlineData("valid-user", "Valid1!", "valid", "invalid-email", false)]
     public async Task RegisterInputValidationTest(string username, string password, string? displayName, string email, bool shouldPass)
     {
+        // Arrange
+        var request = new RegisterProfileRequest
+        {
+            UserName = username,
+            Password = password,
+            DisplayName = displayName,
+            Email = email,
+        };
+
         // Act
-        var result = await _service.RegisterUser(username, password, displayName, email);
+        var result = await _service.RegisterUserAsync(request);
 
         // Assert 
         if (shouldPass) Assert.True(result.Success);

@@ -18,15 +18,12 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
-    public record RegisterRequest(string UserName, string Password, string Email, string DisplayName);
     public record LoginRequest(string UserName, string Password);
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterProfileRequest request)
     {
-        var result = await _authService.RegisterUser(
-            request.UserName, request.Password,
-            request.DisplayName, request.Email);
+        var result = await _authService.RegisterUserAsync(request);
 
         if (result.IsFailed)
         {
@@ -41,7 +38,7 @@ public class AuthController : ControllerBase
     [HttpPost("log-in")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var result = await _authService.LoginUser(
+        var result = await _authService.LoginUserAsync(
             request.UserName, request.Password);
 
         if (result.IsFailed)
@@ -59,7 +56,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         var user = GetUsername(User);
-        await _authService.LogoutUser();
+        await _authService.LogoutUserAsync();
         _logger.LogInformation("User @{User} logged-out", user);
 
         return Ok("Logged-out");
