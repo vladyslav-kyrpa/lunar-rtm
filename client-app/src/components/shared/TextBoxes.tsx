@@ -6,13 +6,15 @@ import ClosedEye from "../../assets/icons/eye-closed.svg";
 interface TextBoxProps {
     onChange: (value: string) => void;
     placeholder?: string;
+    autofill?:string;
     value: string;
     isSecret?: boolean;
     className?: string;
     isError?: boolean;
 }
 
-export function FormTextBox({ onChange, placeholder, value, isSecret, className, isError }: TextBoxProps) {
+export function FormTextBox({ onChange, placeholder, value, isSecret, 
+    className, isError, autofill }: TextBoxProps) {
     const [isHidden, setIsHidden] = useState<boolean>(true);
 
     const basicStyles = `flex p-1 bg-background outline-2 focus:outline-active 
@@ -22,6 +24,7 @@ export function FormTextBox({ onChange, placeholder, value, isSecret, className,
         <input
             className={`flex-1 p-2 rounded`}
             type={isSecret && isHidden ? "password" : "text"}
+            autoComplete={autofill}
             placeholder={placeholder}
             value={value}
             onChange={(e) => onChange(e.currentTarget.value)}

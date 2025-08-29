@@ -49,36 +49,37 @@ export default function RegisterPage() {
             <p className="text-center font-bold mb-5">Register</p>
 
             {isRised && <BlockNotification className="mb-3" text={errorText} />}
+            <form>
+                <label className="mb-3">Username</label>
+                <FormTextBox value={username} onChange={setUsername}
+                    placeholder="Enter username" className="mb-5"
+                    isError={!isUsernameValid(username)} />
 
-            <label className="mb-3">Username</label>
-            <FormTextBox value={username} onChange={setUsername}
-                placeholder="Enter username" className="mb-5"
-                isError={!isUsernameValid(username)} />
+                <label className="mb-3">Display Name</label>
+                <FormTextBox value={displayName} onChange={setDisplayName}
+                    placeholder="Enter Display Name" className="mb-5"
+                    isError={!isDisplayNameValid(displayName)} />
 
-            <label className="mb-3">Display Name</label>
-            <FormTextBox value={displayName} onChange={setDisplayName}
-                placeholder="Enter Display Name" className="mb-5"
-                isError={!isDisplayNameValid(displayName)} />
+                <label className="mb-3">Email</label>
+                <FormTextBox value={email} onChange={setEmail}
+                    placeholder="Example: box@mail.com" className="mb-5"
+                    isError={!isEmailValid(email)} />
 
-            <label className="mb-3">Email</label>
-            <FormTextBox value={email} onChange={setEmail}
-                placeholder="Example: box@mail.com" className="mb-5"
-                isError={!isEmailValid(email)} />
+                <label className="mb-3">Password</label>
+                <FormTextBox value={password} onChange={setPassword}
+                    isSecret={true}
+                    placeholder="Enter password" className="mb-5"
+                    isError={!isPasswordValid(password)} />
 
-            <label className="mb-3">Password</label>
-            <FormTextBox value={password} onChange={setPassword}
-                isSecret={true}
-                placeholder="Enter password" className="mb-5"
-                isError={!isPasswordValid(password)} />
+                <label className="mb-3">Confirmed password</label>
+                <FormTextBox value={confirmedPassword} onChange={setConfirmedPassword}
+                    isSecret={true}
+                    placeholder="Enter password again" className="mb-10"
+                    isError={password !== confirmedPassword || confirmedPassword === ''} />
 
-            <label className="mb-3">Confirmed password</label>
-            <FormTextBox value={confirmedPassword} onChange={setConfirmedPassword}
-                isSecret={true}
-                placeholder="Enter password again" className="mb-10"
-                isError={password !== confirmedPassword || confirmedPassword === ''} />
-
-            <ActiveButton onClick={handleSubmit} className="mb-3">Register</ActiveButton>
-            <TextButton onClick={handleToLogIn} text="I have an account" />
+                <ActiveButton onClick={handleSubmit} className="mb-3">Register</ActiveButton>
+                <TextButton onClick={handleToLogIn} text="I have an account" />
+            </form>
         </Block>
     </div>
 }
