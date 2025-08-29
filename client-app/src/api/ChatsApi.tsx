@@ -119,4 +119,22 @@ async function updateImage(id: string, image: File) {
     }
 }
 
-export default { fetchChats, fetchChat, fetchMessages, createChat, updateChat, deleteChat, updateImage, inviteUser, removeUser, leave }
+async function promoteUser(username:string, role:string, chatId:string){
+    const result = await fetch(`/api/chats/${chatId}/promote-member`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, role })
+    });
+    if (!result.ok) {
+        throw Error("Failed to kick chat member: " + result.statusText);
+    }
+}
+
+export default { 
+    fetchChats, fetchChat, fetchMessages, 
+    createChat, updateChat, deleteChat, 
+    updateImage, inviteUser, removeUser, 
+    leave, promoteUser
+}

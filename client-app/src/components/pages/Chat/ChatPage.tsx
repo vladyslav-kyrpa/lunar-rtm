@@ -10,6 +10,7 @@ import ChatDetailsPage from "./ChatDetailsPage";
 import EditChatPage from "./EditChatPage";
 import { ChatProvider, useChatContext } from "./ChatContext";
 import { useAuth } from "../../hooks/AuthContext";
+import DefaultPageLayout from "../../shared/DefaultPageLayout";
 
 export default function ChatPage() {
     const { id } = useParams();
@@ -23,7 +24,6 @@ export default function ChatPage() {
 function ChatPageContent() {
     const { chat, messages, sendMessage } = useChatContext();
     const { username: currentUsername } = useAuth();
-    const [text, setText] = useState("");
     const [showDetails, setShowDetails] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
@@ -38,9 +38,9 @@ function ChatPageContent() {
         scrollRef?.current?.scrollIntoView({ 'behavior': "smooth" });
     }
 
-    const handleOnSend = () => {
+    const handleOnSend = (text: string) => {
         if (text === "") return;
-        sendMessage(text).then(() => setText(""));
+        sendMessage(text);
     }
 
     const toggleEdit = () => setIsEditMode(!isEditMode);
@@ -50,27 +50,31 @@ function ChatPageContent() {
     if (isEditMode) return <EditChatPage onClose={toggleEdit} onSubmit={toggleEdit} />
     if (showDetails) return <ChatDetailsPage onClose={toggleShowDetails} onEdit={toggleEdit} />
 
-    return <div className="flex flex-col h-screen">
-        <div className="sticky top-0 h-16 flex items-center justify-center bg-surface"
-            onClick={toggleShowDetails}>
-            <p className="font-bold">{chat.title}</p>
-        </div>
-
-        <div className="flex flex-col flex-1 p-2 overflow-y-auto">
-            {messages.map((item, key) => <MessageItem item={item} key={key}
-                isIncoming={currentUsername === item.sender} />)}
-            <div id="list-bottom-pointer" ref={scrollRef} />
-        </div>
-
-        {chat.currentPermissions.canSendMessages &&
-            <div className="flex flex-row m-2 p-2 rounded border bg-surface border-surface-outline">
-                <HiddenTextBox className="w-full" placeholder="Type message..." onChange={(value) => setText(value)} value={text} />
-                <IconButton inverted={true} iconSrc={SendIcon} onClick={handleOnSend}></IconButton>
-            </div>}
-    </div>
+    return <DefaultPageLayout title={chat.title} onTitleClick={toggleShowDetails}
+        bottom={chat.currentPermissions.canSendMessages && <MessageInputBar onSend={handleOnSend} />}>
+        {messages.map((item, key) => <MessageItem item={item} key={key}
+            isIncoming={currentUsername === item.sender} />)}
+        <div id="list-bottom-pointer" ref={scrollRef} />
+    </DefaultPageLayout>
 }
 
+interface MessageInputBarProps {
+    onSend: (text: string) => void
+}
+function MessageInputBar({ onSend }: MessageInputBarProps) {
+    const [text, setText] = useState("");
 
+    const handleOnSend = () => {
+        if (text === "") return;
+        onSend(text);
+        setText("");
+    }
+
+    return <div className="flex flex-row m-2 p-2 rounded border bg-surface border-surface-outline">
+        <HiddenTextBox className="w-full" placeholder="Type message..." onChange={(value) => setText(value)} value={text} />
+        <IconButton inverted={true} iconSrc={SendIcon} onClick={handleOnSend}></IconButton>
+    </div>
+}
 
 interface MessageItemProps {
     item: ChatMessage,

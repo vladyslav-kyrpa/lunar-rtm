@@ -7,62 +7,76 @@ import useChatMessages from "../../hooks/UseChatMessages";
 type UseChatReturn = {
     chat: Chat | null,
     messages: ChatMessage[],
-    update: (title:string, description:string)=>Promise<void>,
-    updateImage: (image:File)=>Promise<void>
-    delete: ()=>Promise<void>,
-    leave: ()=>Promise<void>,
-    addMember: (username:string)=>Promise<void>,
-    removeMember: (username:string)=>Promise<void>,
-    sendMessage: (content:string)=>Promise<void>
+    update: (title: string, description: string) => Promise<void>,
+    updateImage: (image: File) => Promise<void>
+    delete: () => Promise<void>,
+    leave: () => Promise<void>,
+    addMember: (username: string) => Promise<void>,
+    removeMember: (username: string) => Promise<void>,
+    sendMessage: (content: string) => Promise<void>,
+    promoteMember: (username: string, role: string) => Promise<void>
 };
 
 const ChatContext = createContext<UseChatReturn | null>(null);
 
-interface ChatProviderProps{
-    chatId : string,
-    children : ReactNode
+interface ChatProviderProps {
+    chatId: string,
+    children: ReactNode
 }
-export function ChatProvider ({chatId, children}:ChatProviderProps) {
+export function ChatProvider({ chatId, children }: ChatProviderProps) {
     const chatState = useChat(chatId);
     return <ChatContext.Provider value={chatState}>
         {children}
     </ChatContext.Provider>
 }
 
-export function useChatContext () {
+export function useChatContext() {
     const context = useContext(ChatContext);
-    if(!context) throw new Error("useChatContext should be inside ChatProvider");
+    if (!context) throw new Error("useChatContext should be inside ChatProvider");
     return context;
 }
 
-export function useChat(id:string):UseChatReturn {
-    const [chat, setChat] = useState<Chat|null>(null);
-    const [ messages, sendMessage ] = useChatMessages(id);
-        
-    useEffect(()=>{
-        api.fetchChat(id)
-            .then((chat)=>setChat(chat))
-            .catch((error)=>console.log(error));
-    },[]);
+export function useChat(id: string): UseChatReturn {
+    const [chat, setChat] = useState<Chat | null>(null);
+    const [messages, sendMessage] = useChatMessages(id);
 
-    const onUpdate = async (title:string, description:string) => {
+    useEffect(() => {
+        fetchChat();
+    }, []);
+
+    const fetchChat = () => {
+        api.fetchChat(id)
+            .then((chat) => setChat(chat))
+            .catch((error) => console.log(error));
+    } 
+
+    const onUpdate = async (title: string, description: string) => {
         api.updateChat(id, title, description).then((result) => {
             console.log(result);
-        }).catch((error) => {
-            console.error(error);
-        });
-    }
-
-    const onAddMember = async (username:string) => {
-        api.inviteUser(id, username).then((result) => {
+            return fetchChat();
+        }).then((result)=>{
             console.log(result);
         }).catch((error) => {
             console.error(error);
         });
     }
 
-    const onRemoveMember = async (username:string) => {
+    const onAddMember = async (username: string) => {
+        api.inviteUser(id, username).then((result) => {
+            console.log(result);
+            return fetchChat();
+        }).then((result)=>{
+            console.log(result);
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+
+    const onRemoveMember = async (username: string) => {
         api.removeUser(id, username).then((result) => {
+            console.log(result);
+            return fetchChat();
+        }).then((result)=>{
             console.log(result);
         }).catch((error) => {
             console.error(error);
@@ -79,31 +93,44 @@ export function useChat(id:string):UseChatReturn {
 
     const onDelete = async () => {
         api.deleteChat(id)
-            .then((_)=> setChat(null))
-            .catch((error)=>console.error(error));
+            .then((_) => setChat(null))
+            .catch((error) => console.error(error));
     }
 
-    const onUpdateImage = async (image:File) => {
+    const onUpdateImage = async (image: File) => {
         api.updateImage(id, image)
-            .then((result)=> console.log(result))
-            .catch((error)=>console.error(error));
+            .then((result) => console.log(result))
+            .catch((error) => console.error(error));
     }
 
-    const onSendMessage = async (content:string) => {
-        sendMessage(content, id).then((result)=>{
+    const onSendMessage = async (content: string) => {
+        sendMessage(content, id).then((result) => {
+            console.log(result);
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+
+    const onPromoteMember = async (username: string, role: string) => {
+        api.promoteUser(username, role, id).then((result)=>{
+            console.log(result);
+            return fetchChat();
+        }).then((result)=>{
             console.log(result);
         }).catch((error)=>{
             console.error(error);
         });
     }
 
-    return { chat, messages, 
-        sendMessage : onSendMessage, 
-        update: onUpdate, 
-        addMember: onAddMember, 
-        removeMember : onRemoveMember, 
-        delete: onDelete, 
-        leave: onLeave, 
-        updateImage: onUpdateImage
+    return {
+        chat, messages,
+        sendMessage: onSendMessage,
+        update: onUpdate,
+        addMember: onAddMember,
+        removeMember: onRemoveMember,
+        delete: onDelete,
+        leave: onLeave,
+        updateImage: onUpdateImage,
+        promoteMember: onPromoteMember
     };
 }

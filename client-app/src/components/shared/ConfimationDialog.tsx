@@ -13,7 +13,7 @@ export default function ConfirmationDialog({title, text, onResponse, show}:Confi
         <div className="bg-black opacity-80 w-full h-full absolute">
 
         </div>
-        <Block className="w-[300px] z-100">
+        <Block className="max-w-[400px] w-full z-100">
             <p className="text-center font-bold mb-2">{title}</p>
             <p className="text-center mb-5">{text}</p>
             <div className="flex gap-2">

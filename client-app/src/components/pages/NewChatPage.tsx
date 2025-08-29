@@ -6,6 +6,8 @@ import api from "../../api/ChatsApi";
 import { useNavigate } from "react-router-dom";
 import OptionsSelector from "../shared/OptionsSelector";
 import { ChatType } from "../../data-model/Chat";
+import DefaultPageLayout from "../shared/DefaultPageLayout";
+import RestrictedPageBody from "../shared/RestrictedPageBody";
 
 export default function NewChatPage() {
     const [title, setTitle] = useState("");
@@ -33,27 +35,30 @@ export default function NewChatPage() {
         setChatType(value);
     }
 
-    return <div className="flex justify-center items-center">
-        <Block className="mt-15 flex flex-col w-[400px]">
-            <p className="text-center mb-5">Create new chat</p>
-            <label className="mb-2">Title</label>
-            <FormTextBox 
-                placeholder="New conversation title..." 
-                className="mb-5" value={title} 
-                isError={title === ""}
-                onChange={setTitle}/>
-            <label className="mb-2">Description</label>
-            <FormTextBox 
-                placeholder="What conversation is about..." 
-                className="mb-5" 
-                value={description} 
-                isError={description === ""}
-                onChange={setDescription}/>
+    return <DefaultPageLayout title="New chat">
+        <RestrictedPageBody>
+            <Block className="flex flex-col">
+                <label className="mb-2">Title</label>
+                <FormTextBox 
+                    placeholder="New conversation title..." 
+                    className="mb-5" value={title} 
+                    isError={title === ""}
+                    onChange={setTitle}/>
 
-            <label className="mb-2">Chat type</label>
-            <OptionsSelector className="mb-5" options={chatTypeOptions} onSelected={handleOnTypeSelected}/>
+                <label className="mb-2">Description</label>
+                <FormTextBox 
+                    placeholder="What conversation is about..." 
+                    className="mb-5" 
+                    value={description} 
+                    isError={description === ""}
+                    onChange={setDescription}/>
 
-            <ActiveButton  onClick={handleCreate}>Create</ActiveButton>
-        </Block>
-    </div>
+                <label className="mb-2">Chat type</label>
+                <OptionsSelector className="mb-5" options={chatTypeOptions} 
+                    onSelected={handleOnTypeSelected}/>
+
+                <ActiveButton  onClick={handleCreate}>Create</ActiveButton>
+            </Block>
+        </RestrictedPageBody>
+    </DefaultPageLayout> 
 }

@@ -4,6 +4,7 @@ import { AvatarSize, ChatImage } from "../shared/Avatars";
 import { Block } from "../shared/Blocks";
 import api from "../../api/ChatsApi";
 import type ChatHeader from "../../data-model/ChatHeader";
+import DefaultPageLayout from "../shared/DefaultPageLayout";
 
 export default function ChatsListPage() {
     const [items, setItems] = useState<ChatHeader[]>([]);
@@ -22,12 +23,9 @@ export default function ChatsListPage() {
         })
     }, []);
 
-    return <>
-        <div className="sticky top-0 h-16 flex items-center justify-center bg-surface">
-            <p className="font-bold">Chats list</p>
-        </div>
+    return <DefaultPageLayout title="Chat list">
         <ChatsList onSelected={handleChatSelected} items={items} />
-    </>
+    </DefaultPageLayout>
 }
 
 interface ChatsListProps {

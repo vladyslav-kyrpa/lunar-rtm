@@ -10,6 +10,8 @@ import { UpdatableAvatar } from "../../shared/UpdatableAvatar";
 import { logout } from "../../../api/AuthApi";
 import useNotification from "../../hooks/UseNotification";
 import ConfirmationDialog from "../../shared/ConfimationDialog";
+import DefaultPageLayout from "../../shared/DefaultPageLayout";
+import RestrictedPageBody from "../../shared/RestrictedPageBody";
 
 export default function ProfilePage(){
     const { username } = useParams();
@@ -64,22 +66,26 @@ export function ProfilePageContent() {
         onClose={handleOnCancel} />
 
     return <>
-        <div className="mx-auto p-2 max-w-[500px]">
-            <Block className="mt-15 flex-col flex items-center">
-                <p className="font-bold text-center mb-5">User Profile</p>
-                <UpdatableAvatar imageId={profile.imageId} 
-                    type={"profile-avatar"}
-                    canEdit={isCurrentUser()} 
-                    onSave={handleOnImageUpdate}/>
-                <p className="text-2xl mt-5 text-center">{profile.displayName}</p>
-                <p className="text-minor-text mb-5">username: {profile.username}</p>
-                <p className="mb-5">{profile.bio}</p>
-                {isCurrentUser() && <div>
-                    <MinorButton onClick={handleOnEdit}>Edit profile</MinorButton>
-                    <MinorButton onClick={handleOnDelete}>Delete profile</MinorButton>
-                </div>}
-            </Block>
-        </div>
+        <DefaultPageLayout title="User profile">
+            <RestrictedPageBody>
+                <Block className="flex-col flex items-center">
+                    <UpdatableAvatar imageId={profile.imageId} 
+                        type={"profile-avatar"}
+                        canEdit={isCurrentUser()} 
+                        onSave={handleOnImageUpdate}/>
+
+                    <p className="text-2xl mt-5 text-center">{profile.displayName}</p>
+                    <p className="text-minor-text mb-5">username: {profile.username}</p>
+                    <p className="mb-2">{profile.bio}</p>
+
+                    {isCurrentUser() && <div className="flex flex-row gap-2">
+                        <MinorButton onClick={handleOnEdit}>Edit profile</MinorButton>
+                        <MinorButton onClick={handleOnDelete}>Delete profile</MinorButton>
+                    </div>}
+                </Block>
+            </RestrictedPageBody>
+        </DefaultPageLayout>
+
         <ConfirmationDialog show={isConfirmationRised} 
             onResponse={handleOnDeleteConfirmed} title="Confirmation"
             text={deleteConfText}/>

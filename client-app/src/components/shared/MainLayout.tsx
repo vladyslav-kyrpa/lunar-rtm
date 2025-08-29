@@ -8,11 +8,8 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
     const width = useWindowWidth();
 
-    return <div className="flex overflow-y-auto h-screen">
-        { width < 900 
-            ? <SideMenuSm/>
-            : <div className="w-[350px]"><SideMenu /></div>
-        }
+    return <div className="flex overflow-y-auto h-[100dvh]">
+        {width < 900 ? <SideMenuSm /> : <SideMenu />}
         <div className="flex-1 overflow-y-auto">
             {children}
         </div>
@@ -25,7 +22,6 @@ function useWindowWidth() {
         const onResize = () => {
             setWidth(window.innerWidth);
         }
-
         window.addEventListener('resize', onResize);
 
         return () => {
@@ -41,8 +37,8 @@ function SideMenuSm() {
     const toggleSideMenu = () => {
         setShowMenu(!showMenu);
     }
-    
-    if(showMenu){
+
+    if (showMenu) {
         return <>
             <div className="bg-black opacity-90 z-100 fixed top-0 left-0 right-0 bottom-0" onClick={toggleSideMenu}></div>
             <div className="fixed z-101 top-0 left-0 bottom-0">
@@ -51,7 +47,7 @@ function SideMenuSm() {
         </>
     } else {
         return <div onClick={toggleSideMenu} className="menu-button rounded p-2 mt-2 ml-2">
-            <img src={MenuIcon} alt="" className="invert" height={32} width={32}/>
+            <img src={MenuIcon} alt="" className="invert" height={32} width={32} />
         </div>
     }
 }

@@ -1,4 +1,3 @@
-
 interface ErrorPageProps {
     message: string
 }

@@ -13,7 +13,7 @@ export default function RegisterPage() {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [isError, setIsError] = useState(false);
-    const [errorText, isRised, showError, hideError] = useNotification();
+    const [errorText, isRised, showError] = useNotification();
     const { logIn } = useAuth();
 
     const handleSubmit = () => {
@@ -25,9 +25,8 @@ export default function RegisterPage() {
                 console.error(error);
                 showError(error.message);
             })
-        } else {
-            setIsError(true);
-        }
+        } 
+        else setIsError(true);
     }
 
     const handleToRegister = () => {
@@ -47,6 +46,7 @@ export default function RegisterPage() {
 
             <label className="mb-3">Password</label>
             <FormTextBox value={password} onChange={setPassword}
+                isSecret={true}
                 placeholder="Enter password" className="mb-10"
                 isError={isError && !isPasswordValid(password)} />
 
