@@ -24,7 +24,7 @@ internal class Program
         builder.Services.AddAuthentication().AddCookie("Identity.Application");
         builder.Services.AddAuthorization();
 
-        var connectionString = builder.Configuration.GetConnectionString("main-db");
+        var connectionString = builder.Configuration.GetConnectionString("MainDatabase");
         builder.Services.AddDbContext<MainDbContext>(options =>
             options.UseNpgsql(connectionString));
 
@@ -57,6 +57,14 @@ internal class Program
         builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
         var app = builder.Build();
+
+        // Update database
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+            db.Database.Migrate();
+        }
+
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
